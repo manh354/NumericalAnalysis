@@ -57,14 +57,17 @@ namespace NumericalAnalysis
             }
             return true;
         }
-        public static void MatrixRootOutput(Dictionary<int,Dictionary<int,double>> roots)
+        public static void MatrixRootOutput(Dictionary<int,Dictionary<int,double>> roots, int maxRoot)
         {
             foreach(KeyValuePair<int, Dictionary<int,double>> root in roots )
             {
-                Console.Write("x{0} = ",root.Key);
+                Console.Write("x{0} = ",root.Key+1);
                 foreach(KeyValuePair<int,double> variable in root.Value)
                 {
-                    Console.Write(" {0}*x{1} ", variable.Value, variable.Key);
+                    if (variable.Key == maxRoot)
+                        Console.Write(" {0} ", variable.Value);
+                    else
+                        Console.Write(" {0}*x{1} ", variable.Value, variable.Key+1);
                 }
                 Console.WriteLine();
             }

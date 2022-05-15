@@ -186,7 +186,7 @@ namespace NumericalAnalysis
                         MatrixDecomposition.PrintMatrix(matrix);
                         Dictionary<int, Dictionary<int, double>> roots;
                         MatrixDecomposition.GaussianElimination(ref matrix, out roots);
-                        InOutProcessing.MatrixRootOutput(roots);
+                        InOutProcessing.MatrixRootOutput(roots,matrix.GetLength(1)-1);
                         break;
                     default:
                         break;
