@@ -10,6 +10,28 @@ namespace NumericalAnalysis
 {
     public class MatrixDecomposition
     {
+        #region GaussianElimination
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="matrix"></param>
+        public static void GaussChangeLastCol(ref double[,] matrix)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            for(int i = 0; i< iMax;i++)
+            {
+                matrix[i, jMax - 1] *= -1;
+            }
+        }
+
+        /// <summary>
+        /// Main function.
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <param name="roots"></param>
+        /// <returns></returns>
         public static bool GaussianElimination(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
         {
             int[] firstPosDif0; 
@@ -17,53 +39,50 @@ namespace NumericalAnalysis
             BackwardSubtraction(ref matrix, firstPosDif0, out roots);
             return true;
         }
-        public static bool ForwardSubtraction(ref double[,] matrix, out int[] _firstPosDif0 , double? eps = null)
+
+        /// <summary>
+        /// Subtract matrix from front to back.
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <param name="_firstPosDif0"></param>
+        /// <param name="eps"></param>
+        /// <returns></returns>
+        public static bool ForwardSubtraction(ref double[,] matrix, out int[] _firstPosDif0 , double? eps = 1e-4)
         {
             // Sort 
             int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-            int[] firstPosDif0 = new int[jMax]; // First position that is different from 0
-            for (int i = 0; i < iMax; i++)
-            {
-                for (int j = 0; j < jMax; j++)
-                {
-                    if (matrix[i, j] == 0)
-                    {
-                        firstPosDif0[i] = j;
-                        break;
-                    }
-                }
-                firstPosDif0[i] = 0;
-            }
+            int jMax = matrix.GetLength(1);; // First position that is different from 0
+
+            GaussChangeLastCol(ref matrix);
+
             //Rearrange matrix to a more reversed trapzoid form
-            SortSwap(ref firstPosDif0, ref matrix);
+            UpperTrapezoidSortSwap(null, ref matrix, out int [] firstPosDif0);
             //Main matrix elimination loop
-            for(int k = 0; k < iMax; k++) 
+            for(int i = 0; i < iMax; i++) 
             {
-                for(int dk = k+1; dk < iMax;dk++) 
+                for (int di = i+1; di < iMax; di++)
                 {
-
-                    if(firstPosDif0[k] == firstPosDif0[dk])
+                    double mulCoef = matrix[di, firstPosDif0[i]] / matrix[i, firstPosDif0[i]];
+                    int updateFirstPosDiff = firstPosDif0[di];
+                    for (int j = firstPosDif0[di]; j < jMax; j++)
                     {
-                        double mulCoef = matrix[dk, firstPosDif0[dk]] / matrix[k, firstPosDif0[k]];
-                        Console.WriteLine(mulCoef);
-                        int updateFirstPosDiff = firstPosDif0[k];
-                        for(int l = firstPosDif0[dk]; l< jMax;l++)
+                        matrix[di, j] -= mulCoef * matrix[i, j];
+
+                        if (Math.Abs(matrix[di, j]) < eps) 
+                            matrix[di, j] = 0;
+
+                        // There is a case in which column i and i+1 have the same value, that means after subtracting 2 rows, there are 2 zeros next to each other.
+                        // This if block ensure firstPosDiff is corrected.
+
+                        if (Math.Abs(matrix[di, j]) == 0 && Math.Abs(matrix[di, updateFirstPosDiff]) == 0 && j == updateFirstPosDiff)
                         {
-                            matrix[dk, l]  -= mulCoef * matrix[k, l];
-
-                            // There is a case in which column i and i+1 have the same value, that means after subtracting 2 rows, there are 2 zeros next to each other.
-                            // This if block ensure firstPosDiff is corrected.
-
-                            if(matrix[dk,l] == 0 && matrix[dk,updateFirstPosDiff]==0 && l == updateFirstPosDiff )
-                            {
-                                updateFirstPosDiff = l+1;
-                            }    
+                            updateFirstPosDiff = j + 1;
                         }
-                        PrintMatrix(matrix);
-                        firstPosDif0[dk] = updateFirstPosDiff;
-                    }    
-                }    
+                    }
+                    PrintMatrix(matrix);
+                    firstPosDif0[di] = updateFirstPosDiff;
+                    PrintArray(firstPosDif0);
+                }
             }
             _firstPosDif0 = firstPosDif0;
             //PrintMatrix(matrix);
@@ -71,23 +90,23 @@ namespace NumericalAnalysis
         }
 
         /// <summary>
-        /// Subtract matrix from backward.
+        /// Subtract matrix from back to front.
         /// </summary>
-        /// <param name="matrix"></param>
+        /// <param name="processedMatrix"></param>
         /// <param name="firstPosDif0"></param>
         /// <param name="roots"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool BackwardSubtraction(ref double[,] matrix, int[] firstPosDif0, out Dictionary<int, Dictionary<int, double>> roots , double? eps = null)    
+        public static bool BackwardSubtraction(ref double[,] processedMatrix, int[] firstPosDif0, out Dictionary<int, Dictionary<int, double>> roots , double? eps = null)    
         {
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-            int[] lastPosDif0 = new int[jMax]; //last position that is different from 0
+            int iMax = processedMatrix.GetLength(0);
+            int jMax = processedMatrix.GetLength(1);
+            int[] lastPosDif0 = new int[iMax]; //last position that is different from 0
             for (int i = iMax-1; i >=0 ; i--)
             {
                 for (int j = jMax-1; j > firstPosDif0[i]; j--) 
                 {
-                    if (matrix[i, j] == 0)
+                    if (processedMatrix[i, j] == 0)
                     {
                         lastPosDif0[i] = j;
                         break;
@@ -104,21 +123,33 @@ namespace NumericalAnalysis
             for (int i = iMax - 1; i >= 0; i--)
             {
                 Dictionary<int, double> root = new Dictionary<int, double>();
-                root.Add(jMax - 1, matrix[i, jMax-1]/ matrix[i,firstPosDif0[i]]);
-                for (int j = lastPosDif0[i] -1 ; j > firstPosDif0[i]; j--)
+                for(int indexOfVar = jMax-1;indexOfVar>firstPosDif0[i];indexOfVar--)
                 {
-                    if (j == jMax - 1) break;
-                    matrix[i, j] /= matrix[i, firstPosDif0[i]];
+                    root.Add(indexOfVar, 0);
+                    Console.WriteLine("Added x_{0}",indexOfVar);
+                }
+                for(int j = lastPosDif0[i]; j >= firstPosDif0[i]; j--)
+                {
+                    processedMatrix[i, j] = processedMatrix[i, j] / processedMatrix[i, firstPosDif0[i]];
+                }
+                PrintMatrix(processedMatrix);
+                for (int j = lastPosDif0[i] ; j > firstPosDif0[i]; j--)
+                {
                     if (roots.ContainsKey(j))
                     {
+                        foreach (KeyValuePair<int, double> x_j in roots[j]) 
+                        {
+                            Console.WriteLine("x_j.Key : {0} ",x_j.Key);
+                        }
                         foreach (KeyValuePair<int, double> x_j in roots[j])
                         {
-                            root[x_j.Key] -= - matrix[i,j] *  x_j.Value - matrix[i,x_j.Key];
+                            root[x_j.Key] = root[x_j.Key] -  processedMatrix[i,j] *  x_j.Value ;
                         }
+                        root.Remove(j);
                     }
                     else
                     {
-                        root.Add(j, -matrix[i, j]);
+                        root[j] -=processedMatrix[i, j];
                     }
                 }
                 roots.Add(firstPosDif0[i], root);
@@ -128,58 +159,114 @@ namespace NumericalAnalysis
 
         }
 
+        #endregion
+
+        //In Vietnam , Complete pivoting method of Gauss elimination is called Gauss-Jordan???
+        #region GaussJordanElimination
+
         /// <summary>
-        /// Processing Roots from a backward elimination matrix, Actually this can be grouped with backward elimination.
+        /// Main function.
         /// </summary>
         /// <param name="matrix"></param>
-        /// <param name="firstPosDif0"></param>
-        /// <param name="lastPosDif0"></param>
         /// <param name="roots"></param>
         /// <returns></returns>
-        public static bool RootProcessing(double[,] matrix, int[] firstPosDif0, int[] lastPosDif0, out Dictionary<int, Dictionary<int, double>> roots)
+        public static bool GaussJordanElimination(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
         {
-            roots = new Dictionary<int, Dictionary<int, double>>();
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-            if (firstPosDif0[firstPosDif0.Length - 1] > iMax - 1)
-            {
-                roots = null;
-                return false;
-            }    
-            for (int i= iMax-1; i>=0;i--)
-            {
-                Dictionary<int, double> root = new Dictionary<int, double>();
-                root.Add(jMax, matrix[jMax, i]);
-                for (int j = firstPosDif0[i]+1; j<=lastPosDif0[i];j++)
-                {
-                    if (roots.ContainsKey(j))
-                    {
-                        double rootSimplifing;
-                        foreach (KeyValuePair<int, double> x_i in roots[i])
-                        {
-                            rootSimplifing = -matrix[x_i.Key, i] + x_i.Value;
-                            root.Add(j, rootSimplifing);
-                        }
-                    }
-                    else
-                    {
-                        root.Add(j, -matrix[j, i]);
-                    }
-                }
-                roots.Add(firstPosDif0[i],root);
-            }
+            int[] firstPosDif0;
+            PrioritizeSubtraction(ref matrix, out firstPosDif0);
+            BackwardSubtraction(ref matrix, firstPosDif0, out roots);
             return true;
         }
-        /// <summary>
-        /// Sort array to a reversed trapzoid form
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="firstPosDiff0">Array of first position that is different from 0 in each row of matrix</param>
-        /// <param name="matrix">Input matrix</param>
-        public static void SortSwap<T>(ref int[] firstPosDiff0, ref T[,] matrix)
+
+        public static bool PrioritizeSubtraction(ref double[,] matrix, out int [] _firstPosDif0, double? eps = null)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
+
+            Dictionary<int, bool> chosenCols = new Dictionary<int, bool>(jMax);
+            Dictionary<int, bool> chosenRows = new Dictionary<int, bool>(iMax);
+
+            for(int i =0;i<iMax;i++)
+            {
+                chosenRows.Add(i, false);
+            }
+            for(int j = 0;j<jMax;j++)
+            {
+                chosenCols.Add(j, false);
+            }
+
+            for (int k = 0; k < iMax; k++)
+            {
+                double maxOfMatrix = 0;
+                int col = 0, row = 0;
+                //Find the pivot point
+                for (int i = 0; i < iMax; i++)
+                {
+                    if (chosenRows[i]) continue;
+                    for (int j = 0; j < jMax; j++)
+                    {
+                        if (chosenCols[j]) continue;
+                        if (maxOfMatrix < Math.Abs(matrix[i, j]))
+                        {
+                            maxOfMatrix = matrix[i, j];
+                            row = i;
+                            col = j;
+                        }
+                    }
+                }
+                chosenCols[col] = true;
+                chosenRows[row] = true;
+                for (int i = 0;i < iMax;i++)
+                {
+                    if (chosenRows[i]) continue;
+                    double muCoef = matrix[i, col] / matrix[row, col];
+                    for(int di = 0; di < iMax;di++)
+                    {
+                        matrix[di, col] = matrix[di, col] - muCoef * matrix[row, col];
+                    }
+                }
+                PrintMatrix(matrix);
+            }
+            UpperTrapezoidSortSwap(null,ref matrix, out _firstPosDif0);
+            PrintMatrix(matrix);
+            return true;
+        }
+
+        #endregion
+
+        #region LU decomposition
+
+
+
+        #endregion
+
+        /// <summary>
+        /// Sort array to a upper trapezoidial form.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="firstPosDif0">Array of first position that is different from 0 in each row of matrix</param>
+        /// <param name="matrix">Input matrix</param>
+        public static void UpperTrapezoidSortSwap<T>( int[] firstPosDif0, ref T[,] matrix, out int[] _firstPosDiff0)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            if (firstPosDif0 == null)
+            {
+                firstPosDif0 = new int[iMax]; // First position that is different from 0
+                for (int i = 0; i < iMax; i++)
+                {
+                    for (int j = 0; j < jMax; j++)
+                    {
+                        if (!matrix[i, j].Equals(0))
+                        {
+                            firstPosDif0[i] = j;
+                            break;
+                        }
+                    }
+                    firstPosDif0[i] = 0;
+                }
+            }
 
             //SelectionSort
             for (int i = 0; i< iMax;i++)
@@ -187,15 +274,17 @@ namespace NumericalAnalysis
                 int minIndex = i;
                 for (int j = i;j<iMax;j++)
                 {
-                    if (firstPosDiff0[minIndex] > firstPosDiff0[j]) 
+                    if (firstPosDif0[minIndex] > firstPosDif0[j]) 
                         minIndex = j;    
                 }
                 if (i != minIndex)
                 {
-                    Swap(ref firstPosDiff0[minIndex], ref firstPosDiff0[i]);
+                    Swap(ref firstPosDif0[minIndex], ref firstPosDif0[i]);
                     SwapRow(ref matrix, minIndex, i);
                 }
-            }    
+            }
+
+            _firstPosDiff0 = firstPosDif0;
         }    
 
         /// <summary>
@@ -254,9 +343,18 @@ namespace NumericalAnalysis
             for (int i = 0; i < iMax; i++)
             {
                 for (int j = 0; j < jMax; j++)
-                    Console.Write(matrix[i, j].ToString()+ " ");
+                    Console.Write(matrix[i, j].ToString() + " ");
                 Console.WriteLine();
             }
+            Console.WriteLine();
+        }
+        public static void PrintArray<T>(T[] array)
+        {
+            int len = array.Length;
+            Console.Write("array: ");
+            for (int i = 0; i < len; i++)
+                Console.Write(array[i].ToString()+ " ");
+            Console.WriteLine();
         }
     }
 }

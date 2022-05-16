@@ -10,7 +10,7 @@ namespace NumericalAnalysis
         {
             while (true)
             {
-                Console.Write("What do you want me to do?: ");
+                Console.Write("Chapter1: ");
                 string i = Console.ReadLine();
                 if (i == "0") break;
                 
@@ -168,7 +168,7 @@ namespace NumericalAnalysis
                         i = "0";
                         break;
                 }
-                Console.WriteLine("Chapter2: ");
+                Console.Write("Chapter2: ");
                 i = Console.ReadLine();
                 switch (i)
                 {
@@ -187,6 +187,22 @@ namespace NumericalAnalysis
                         Dictionary<int, Dictionary<int, double>> roots;
                         MatrixDecomposition.GaussianElimination(ref matrix, out roots);
                         InOutProcessing.MatrixRootOutput(roots,matrix.GetLength(1)-1);
+                        break;
+                    case "2":
+                        Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
+                        Console.ReadLine();
+                        Console.WriteLine("Processing matrix");
+                        string fileLocation2 = @"MatrixInput.txt";
+                        double[,] matrix2;
+                        if (!InOutProcessing.MatrixInput(out matrix2, fileLocation2))
+                        {
+                            Console.WriteLine("Invalid Inputs");
+                            break;
+                        }
+                        MatrixDecomposition.PrintMatrix(matrix2);
+                        Dictionary<int, Dictionary<int, double>> roots2;
+                        MatrixDecomposition.GaussJordanElimination(ref matrix2, out roots2);
+                        InOutProcessing.MatrixRootOutput(roots2, matrix2.GetLength(1) - 1);
                         break;
                     default:
                         break;

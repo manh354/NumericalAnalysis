@@ -64,6 +64,7 @@ namespace NumericalAnalysis
                 Console.Write("x{0} = ",root.Key+1);
                 foreach(KeyValuePair<int,double> variable in root.Value)
                 {
+                    if (variable.Value == 0) continue;
                     if (variable.Key == maxRoot)
                         Console.Write(" {0} ", variable.Value);
                     else
