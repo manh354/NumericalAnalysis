@@ -185,7 +185,7 @@ namespace NumericalAnalysis
                         }
                         MatrixDecomposition.PrintMatrix(matrix);
                         Dictionary<int, Dictionary<int, double>> roots;
-                        MatrixDecomposition.GaussianElimination(ref matrix, out roots);
+                        MatrixDecomposition.GaussMain(ref matrix, out roots);
                         InOutProcessing.MatrixRootOutput(roots,matrix.GetLength(1)-1);
                         break;
                     case "2":
@@ -201,8 +201,21 @@ namespace NumericalAnalysis
                         }
                         MatrixDecomposition.PrintMatrix(matrix2);
                         Dictionary<int, Dictionary<int, double>> roots2;
-                        MatrixDecomposition.GaussJordanElimination(ref matrix2, out roots2);
+                        MatrixDecomposition.GaussJordanMain(ref matrix2, out roots2);
                         InOutProcessing.MatrixRootOutput(roots2, matrix2.GetLength(1) - 1);
+                        break;
+                    case "3":
+                        Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
+                        Console.ReadLine();
+                        Console.WriteLine("Processing matrix");
+                        string fileLocation3 = @"MatrixInput.txt";
+                        double[,] matrix3;
+                        if (!InOutProcessing.MatrixInput(out matrix3, fileLocation3))
+                        {
+                            Console.WriteLine("Invalid Inputs");
+                            break;
+                        }
+                        MatrixDecomposition.LUmain(ref matrix3);
                         break;
                     default:
                         break;

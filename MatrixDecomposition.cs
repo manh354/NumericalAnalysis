@@ -32,11 +32,11 @@ namespace NumericalAnalysis
         /// <param name="matrix"></param>
         /// <param name="roots"></param>
         /// <returns></returns>
-        public static bool GaussianElimination(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
+        public static bool GaussMain(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
         {
             int[] firstPosDif0; 
-            ForwardSubtraction(ref matrix, out firstPosDif0);
-            BackwardSubtraction(ref matrix, firstPosDif0, out roots);
+            ForwardElimination(ref matrix, out firstPosDif0);
+            BackwardSubstitution(ref matrix, firstPosDif0, out roots);
             return true;
         }
 
@@ -47,7 +47,7 @@ namespace NumericalAnalysis
         /// <param name="_firstPosDif0"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool ForwardSubtraction(ref double[,] matrix, out int[] _firstPosDif0 , double? eps = 1e-4)
+        public static bool ForwardElimination(ref double[,] matrix, out int[] _firstPosDif0 , double? eps = 1e-4)
         {
             // Sort 
             int iMax = matrix.GetLength(0);
@@ -99,7 +99,7 @@ namespace NumericalAnalysis
         /// <param name="roots"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool BackwardSubtraction(ref double[,] processedMatrix, int[] firstPosDif0, out Dictionary<int, Dictionary<int, double>> roots , double? eps = null)    
+        public static bool BackwardSubstitution(ref double[,] processedMatrix, int[] firstPosDif0, out Dictionary<int, Dictionary<int, double>> roots , double? eps = null)    
         {
             int iMax = processedMatrix.GetLength(0);
             int jMax = processedMatrix.GetLength(1);
@@ -172,7 +172,7 @@ namespace NumericalAnalysis
         /// <param name="matrix"></param>
         /// <param name="roots"></param>
         /// <returns></returns>
-        public static bool GaussJordanElimination(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
+        public static bool GaussJordanMain(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
         {
             int[] firstPosDif0;
             PrioritizedSubtraction(ref matrix, out firstPosDif0,out int[] changedPos);
@@ -310,7 +310,89 @@ namespace NumericalAnalysis
 
         #region LU decomposition
 
+        public static bool LUmain(ref double[,]matrix)
+        {
+            int n = matrix.GetLength(0);
 
+            double[,] U, L;
+            LUdecomposition(ref matrix, out U, out L);
+            return false;
+        }
+
+
+        public static bool LUdecomposition(ref double[,] matrix, out double[,] U, out double[,] L)
+        {
+            int n = matrix.GetLength(0);
+            U = new double[n, n];
+            L = new double[n, n];
+            if (matrix.GetLength(1) != n + 1)
+            {
+                return false;
+            }
+            for (int k = 0; k < n; k++)
+            {
+                U[k,k] = 1;
+                L[k,k] = matrix[k,k];
+                for (int i = k + 1; i < n; i++)
+                {
+                    L[i,k] = matrix[i,k] / U[k,k];
+                    U[k,i] = matrix[k,i];
+                    U[i,k] = 0;
+                    L[k,i] = 0;
+                }
+                for (int i = k + 1; i < n; i++)
+                    for (int j = k + 1; j < n; j++)
+                        matrix[i,j] = matrix[i,j] - L[i,k] * U[k,j];
+            }
+            PrintMatrix(matrix);PrintMatrix(U);PrintMatrix(L);
+            return true;
+        }
+
+        public static bool MatrixMultiplier(double[,]leftMatrix, double[,] rightMatrix, out double[,] result)
+        {
+            int lNumRow = leftMatrix.GetLength(0);
+            int lNumCol = leftMatrix.GetLength(1);
+            int rNumRow = rightMatrix.GetLength(0);
+            int rNumCol = rightMatrix.GetLength(1);
+            if (lNumCol != rNumRow)
+            {
+                result = null;
+                return false;
+            }
+            result = new double[lNumRow, rNumCol]; 
+            for(int i = 0;i<lNumRow;i++)
+            {
+                for(int j = 0;j<rNumCol;j++)
+                {
+                    result[i, j] = 0;
+                    for (int k = 0; k < lNumCol; k++)
+                        result[i, j] += leftMatrix[i, k] * rightMatrix[k, j];
+                }
+            }
+            return true;
+        }
+
+        #endregion
+
+        #region Iterative
+
+        //Require B matrix's norm < q < 1 ; x = Bx + b; strictly dorminant matrix
+
+        public static void IterativeMain()
+        {
+            IterativeInputProcess();
+            SingularIterative();
+        }
+
+        public static void IterativeInputProcess()
+        {
+
+        }
+
+        public static void SingularIterative()
+        {
+
+        }
 
         #endregion
 
