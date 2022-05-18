@@ -187,7 +187,7 @@ namespace NumericalAnalysis
         /// <param name="_firstPosDif0"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool PrioritizedSubtraction(ref double[,] matrix, out int [] _firstPosDif0, out int[] changedPos,double? eps = null)
+        public static bool PrioritizedSubtraction(ref double[,] matrix, out int [] _firstPosDif0, out int[] changedPos,double? eps = 1e-7)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -231,13 +231,14 @@ namespace NumericalAnalysis
                 {
                     if (i == row) continue;
                     double muCoef = matrix[i, col] / matrix[row, col];
-                    Console.WriteLine("muCoef : {0} ", muCoef);
+                    //Console.WriteLine("muCoef : {0} ", muCoef);
                     for(int j = 0; j < jMax;j++)
                     {
                         matrix[i, j] = matrix[i, j] - muCoef * matrix[row, j];
+                        if (Math.Abs(matrix[i, j]) < eps) matrix[i, j] = 0; // Rounding matrix at position to ensure no errors.
                     }
                 }
-                PrintMatrix(matrix);
+                PrintMatrix(matrix, true);
             }
             SwapColGaussJordan(chosenCols, ref matrix, out changedPos);
             UpperTrapezoidSortSwap(null,ref matrix, out _firstPosDif0);
@@ -276,7 +277,7 @@ namespace NumericalAnalysis
                 {
                     processedMatrix[i, j] = processedMatrix[i, j] / processedMatrix[i, firstPosDif0[i]];
                 }
-                PrintMatrix(processedMatrix);
+                PrintMatrix(processedMatrix, true);
                 for (int j = jMax-1; j > firstPosDif0[i]; j--)
                 {
                     root[changedPos[j]] -= processedMatrix[i, j];
@@ -301,7 +302,7 @@ namespace NumericalAnalysis
                         {
                             SwapCol(ref matrix, j, dj);
                             Swap(ref changedPos[j],ref changedPos[dj]);
-                            PrintMatrix(matrix);
+                            PrintMatrix(matrix, true);
                             break;
                         }
         }
@@ -331,8 +332,8 @@ namespace NumericalAnalysis
             }
             for (int k = 0; k < n; k++)
             {
-                U[k,k] = 1;
-                L[k,k] = matrix[k,k];
+                U[k,k] = matrix[k, k];
+                L[k,k] = 1;
                 for (int i = k + 1; i < n; i++)
                 {
                     L[i,k] = matrix[i,k] / U[k,k];
@@ -374,25 +375,97 @@ namespace NumericalAnalysis
 
         #endregion
 
-        #region Iterative
+        #region JacobiIterative
 
-        //Require B matrix's norm < q < 1 ; x = Bx + b; strictly dorminant matrix
+        //Require B matrix's norm < q < 1 ; x = Bx + b
 
-        public static void IterativeMain()
+        public static void JacobiIterativeMain(ref double[,] matrix, double eps = 1e-7)
         {
-            IterativeInputProcess();
-            SingularIterative();
+            double[] seed = new double[matrix.GetLength(0)];
+            for (int n = 0; n < seed.Length; n++)
+            {
+                seed[n] = 0;
+            }
+            string s;
+            if (!JacobiIterativeMethod(ref matrix,seed,out double[] root, eps, out s))
+            {
+                Console.WriteLine(s); 
+                return;
+            }
+            PrintArray(root, true, "root");
         }
 
-        public static void IterativeInputProcess()
+        public static bool JacobiIterativeMethod(ref double[,] matrix ,double[] seed ,out double[] root, double eps, out string s)
         {
+            ChangeLastColSide(ref matrix);
 
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            if (iMax != jMax - 1)
+            {
+                s = "Not a square matrix";
+                root = null;
+                return false;
+            }
+            root = new double[iMax];
+            double[] root2 = new double[iMax];
+            for (int k = 0; k < iMax; k++) 
+            {
+                root2[k] = root[k];
+            }
+            int itr =0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+            do
+            {
+                for (int k = 0; k < iMax; k++)
+                {
+                    root[k] = root2[k];
+                }
+                if (itr > itrMax)
+                {
+                    s = "Does not converge";
+                    return false;
+                }
+                for (int i = 0; i < iMax; i++)
+                {
+                    double temp = 0;
+                    for (int j = 0; j < jMax; j++)
+                    {
+                        if (i == j) continue;
+                        if (j == jMax-1)
+                        {
+                            temp -= matrix[i, j];
+                            continue;
+                        }
+                        temp -= matrix[i, j] * root[j];
+                    }
+                    root2[i] = temp / matrix[i, i];
+                    //Console.WriteLine("temp2: " + root2[i]);
+                    //Console.WriteLine("temp: " + root[i]);
+                    //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
+                }
+                itr++;
+                PrintArray(root2, true);
+                //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
+            } while (!JacobiIterativeRootDistance(root, root2, eps));
+            ChangeLastColSide(ref matrix);
+            s = null;
+            return true;
         }
 
-        public static void SingularIterative()
+        public static bool JacobiIterativeRootDistance(double[] root1, double[] root2, double eps)
         {
-
+            int size = root1.Length;
+            for (int i = 0; i < size; i++)
+                if (Math.Abs(root1[i] - root2[i]) > eps)
+                    return false;
+            return true;
         }
+
+        #endregion
+
+        #region Gauss-Seidel
+
+
 
         #endregion
 
@@ -506,13 +579,39 @@ namespace NumericalAnalysis
             }
             Console.WriteLine();
         }
-        public static void PrintArray<T>(T[] array)
+
+        public static void PrintMatrix(double[,] matrix, bool flippedLastCol = false)
         {
-            int len = array.Length;
-            Console.Write("array: ");
-            for (int i = 0; i < len; i++)
-                Console.Write(array[i].ToString()+ " ");
+            if (flippedLastCol)
+                ChangeLastColSide(ref matrix);
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            for (int i = 0; i < iMax; i++)
+            {
+                for (int j = 0; j < jMax; j++)
+                    Console.Write(matrix[i, j].ToString() + " ");
+                Console.WriteLine();
+            }
             Console.WriteLine();
+        }
+
+        public static void PrintArray<T>(T[] array, bool printVertically =  false, string s = "array")
+        {
+            if (!printVertically)
+            {
+                int len = array.Length;
+                Console.Write("{0}: ",s);
+                for (int i = 0; i < len; i++)
+                    Console.Write(array[i].ToString());
+                Console.WriteLine();
+                return;
+            }
+            int len2 = array.Length;
+            Console.WriteLine("{0}: ", s);
+            for (int i = 0; i < len2; i++)
+            {
+                Console.WriteLine(array[i].ToString()+" ");
+            }
         }
 
         #endregion

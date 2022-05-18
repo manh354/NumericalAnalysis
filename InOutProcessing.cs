@@ -29,14 +29,14 @@ namespace NumericalAnalysis
                 matrix = null;
                 return false;
             }
-            Console.WriteLine("iMax = {0} ",iMax);
+            //Console.WriteLine("iMax = {0} ",iMax);
             Queue<string[]> s_processed = new Queue<string[]>();
             foreach(string rowRaw in s)
             {
                 s_processed.Enqueue(rowRaw.Split(' '));
             }
             jMax = s_processed.Peek().Length;
-            Console.WriteLine("jMax = {0}", jMax);
+            //Console.WriteLine("jMax = {0}", jMax);
             matrix = new double[iMax, jMax];
             int i = 0;
             foreach (string[] row in s_processed)

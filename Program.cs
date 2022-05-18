@@ -217,6 +217,19 @@ namespace NumericalAnalysis
                         }
                         MatrixDecomposition.LUmain(ref matrix3);
                         break;
+                    case "4":
+                        Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
+                        Console.ReadLine();
+                        Console.WriteLine("Processing matrix");
+                        string fileLocation4 = @"MatrixInput.txt";
+                        double[,] matrix4;
+                        if (!InOutProcessing.MatrixInput(out matrix4, fileLocation4))
+                        {
+                            Console.WriteLine("Invalid Inputs");
+                            break;
+                        }
+                        MatrixDecomposition.JacobiIterativeMain(ref matrix4, 0.000000000001);
+                        break;
                     default:
                         break;
                 }
