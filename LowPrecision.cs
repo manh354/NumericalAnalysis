@@ -13,23 +13,7 @@ namespace NumericalAnalysis
             double.TryParse(Console.ReadLine(), out a);
             double.TryParse(Console.ReadLine(), out b);
             double.TryParse(Console.ReadLine(), out eps);
-            int sign = SMath.Sign(SMath.Log(a) - 1);
-            firstStep:
-            double c = (a + b) / 2;
-            double z = System.Math.Log(c) - 1;
-            if (z == 0)
-            {
-                Console.WriteLine("x= " + c);
-                return;
-            }
-            if (z * sign < 0) { b = c; }
-            else a = c;
-            if (SMath.Abs(b - a) < eps)
-            {
-                Console.WriteLine("x= " + c);
-                return;
-            }
-            else goto firstStep;
+            
         }
 
 

@@ -7,11 +7,36 @@
 
   <ItemGroup>
     <PackageReference Include="Flee" Version="2.0.0" />
-    <PackageReference Include="LongCalc" Version="0.5.33" />
-    <PackageReference Include="Mpir.NET" Version="0.4.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Properties\string.vi.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>string.vi.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\string.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>string.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\string.vi.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>string.vi.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\string.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>string.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="FunctionInput.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MatrixInput.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

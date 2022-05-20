@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NumericalAnalysis
 {
-    public class MatrixDecomposition
+    public partial class Algorithms
     {
         #region GaussianElimination
 
@@ -20,7 +20,7 @@ namespace NumericalAnalysis
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            for(int i = 0; i< iMax;i++)
+            for (int i = 0; i < iMax; i++)
             {
                 matrix[i, jMax - 1] *= -1;
             }
@@ -32,9 +32,9 @@ namespace NumericalAnalysis
         /// <param name="matrix"></param>
         /// <param name="roots"></param>
         /// <returns></returns>
-        public static bool GaussMain(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
+        public static bool GaussMain(ref double[,] matrix, out Dictionary<int, Dictionary<int, double>> roots)
         {
-            int[] firstPosDif0; 
+            int[] firstPosDif0;
             ForwardElimination(ref matrix, out firstPosDif0);
             BackwardSubstitution(ref matrix, firstPosDif0, out roots);
             return true;
@@ -47,20 +47,20 @@ namespace NumericalAnalysis
         /// <param name="_firstPosDif0"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool ForwardElimination(ref double[,] matrix, out int[] _firstPosDif0 , double? eps = 1e-4)
+        public static bool ForwardElimination(ref double[,] matrix, out int[] _firstPosDif0, double? eps = 1e-4)
         {
             // Sort 
             int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);; // First position that is different from 0
+            int jMax = matrix.GetLength(1); ; // First position that is different from 0
 
             ChangeLastColSide(ref matrix);
 
             //Rearrange matrix to a more reversed trapzoid form
-            UpperTrapezoidSortSwap(null, ref matrix, out int [] firstPosDif0);
+            UpperTrapezoidSortSwap(null, ref matrix, out int[] firstPosDif0);
             //Main matrix elimination loop
-            for(int i = 0; i < iMax; i++) 
+            for (int i = 0; i < iMax; i++)
             {
-                for (int di = i+1; di < iMax; di++)
+                for (int di = i + 1; di < iMax; di++)
                 {
                     double mulCoef = matrix[di, firstPosDif0[i]] / matrix[i, firstPosDif0[i]];
                     //Console.WriteLine("frac: " + matrix[di, firstPosDif0[i]]+"\\" + matrix[i, firstPosDif0[i]]);
@@ -70,7 +70,7 @@ namespace NumericalAnalysis
                     {
                         matrix[di, j] -= mulCoef * matrix[i, j];
 
-                        if (Math.Abs(matrix[di, j]) < eps) 
+                        if (Math.Abs(matrix[di, j]) < eps)
                             matrix[di, j] = 0;
 
                         // There is a case in which column i and i+1 have the same value, that means after subtracting 2 rows, there are 2 zeros next to each other.
@@ -99,14 +99,14 @@ namespace NumericalAnalysis
         /// <param name="roots"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool BackwardSubstitution(ref double[,] processedMatrix, int[] firstPosDif0, out Dictionary<int, Dictionary<int, double>> roots , double? eps = null)    
+        public static bool BackwardSubstitution(ref double[,] processedMatrix, int[] firstPosDif0, out Dictionary<int, Dictionary<int, double>> roots, double? eps = null)
         {
             int iMax = processedMatrix.GetLength(0);
             int jMax = processedMatrix.GetLength(1);
             int[] lastPosDif0 = new int[iMax]; //last position that is different from 0
-            for (int i = iMax-1; i >=0 ; i--)
+            for (int i = iMax - 1; i >= 0; i--)
             {
-                for (int j = jMax-1; j > firstPosDif0[i]; j--) 
+                for (int j = jMax - 1; j > firstPosDif0[i]; j--)
                 {
                     if (processedMatrix[i, j] == 0)
                     {
@@ -114,7 +114,7 @@ namespace NumericalAnalysis
                         break;
                     }
                 }
-                lastPosDif0[i] = jMax-1;
+                lastPosDif0[i] = jMax - 1;
             }
             roots = new Dictionary<int, Dictionary<int, double>>();
             if (firstPosDif0[firstPosDif0.Length - 1] > iMax - 1)
@@ -125,17 +125,17 @@ namespace NumericalAnalysis
             for (int i = iMax - 1; i >= 0; i--)
             {
                 Dictionary<int, double> root = new Dictionary<int, double>();
-                for(int indexOfVar = jMax-1;indexOfVar>firstPosDif0[i];indexOfVar--)
+                for (int indexOfVar = jMax - 1; indexOfVar > firstPosDif0[i]; indexOfVar--)
                 {
                     root.Add(indexOfVar, 0);
                     //Console.WriteLine("Added x_{0}",indexOfVar);
                 }
-                for(int j = lastPosDif0[i]; j >= firstPosDif0[i]; j--)
+                for (int j = lastPosDif0[i]; j >= firstPosDif0[i]; j--)
                 {
                     processedMatrix[i, j] = processedMatrix[i, j] / processedMatrix[i, firstPosDif0[i]];
                 }
                 PrintMatrix(processedMatrix);
-                for (int j = lastPosDif0[i] ; j > firstPosDif0[i]; j--)
+                for (int j = lastPosDif0[i]; j > firstPosDif0[i]; j--)
                 {
                     if (roots.ContainsKey(j))
                     {
@@ -145,13 +145,13 @@ namespace NumericalAnalysis
                         //}
                         foreach (KeyValuePair<int, double> x_j in roots[j])
                         {
-                            root[x_j.Key] = root[x_j.Key] -  processedMatrix[i,j] *  x_j.Value ;
+                            root[x_j.Key] = root[x_j.Key] - processedMatrix[i, j] * x_j.Value;
                         }
                         root.Remove(j);
                     }
                     else
                     {
-                        root[j] -=processedMatrix[i, j];
+                        root[j] -= processedMatrix[i, j];
                     }
                 }
                 roots.Add(firstPosDif0[i], root);
@@ -171,10 +171,10 @@ namespace NumericalAnalysis
         /// <param name="matrix"></param>
         /// <param name="roots"></param>
         /// <returns></returns>
-        public static bool GaussJordanMain(ref double[,] matrix, out Dictionary<int,Dictionary<int,double>> roots)
+        public static bool GaussJordanMain(ref double[,] matrix, out Dictionary<int, Dictionary<int, double>> roots)
         {
             int[] firstPosDif0;
-            PrioritizedSubtraction(ref matrix, out firstPosDif0,out int[] changedPos);
+            PrioritizedSubtraction(ref matrix, out firstPosDif0, out int[] changedPos);
             GaussJordanAddingRoots(ref matrix, firstPosDif0, changedPos, out roots);
             return true;
         }
@@ -186,7 +186,7 @@ namespace NumericalAnalysis
         /// <param name="_firstPosDif0"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool PrioritizedSubtraction(ref double[,] matrix, out int [] _firstPosDif0, out int[] changedPos,double? eps = 1e-7)
+        public static bool PrioritizedSubtraction(ref double[,] matrix, out int[] _firstPosDif0, out int[] changedPos, double? eps = 1e-7)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -196,11 +196,11 @@ namespace NumericalAnalysis
             bool[] chosenCols = new bool[jMax - 1]; // Minus 1 to not include matrix b in choosing pivot points
             bool[] chosenRows = new bool[iMax];
 
-            for(int i =0;i<iMax;i++)
+            for (int i = 0; i < iMax; i++)
             {
                 chosenRows[i] = false;
             }
-            for(int j = 0;j<jMax-1;j++) // Minus 1 to not include matrix b in choosing pivot points
+            for (int j = 0; j < jMax - 1; j++) // Minus 1 to not include matrix b in choosing pivot points
             {
                 chosenCols[j] = false;
             }
@@ -213,7 +213,7 @@ namespace NumericalAnalysis
                 for (int i = 0; i < iMax; i++)
                 {
                     if (chosenRows[i]) continue;
-                    for (int j = 0; j < jMax-1; j++) // Minus 1 to not include matrix b in choosing pivot points
+                    for (int j = 0; j < jMax - 1; j++) // Minus 1 to not include matrix b in choosing pivot points
                     {
                         if (chosenCols[j]) continue;
                         if (maxOfMatrix < Math.Abs(matrix[i, j]))
@@ -226,12 +226,12 @@ namespace NumericalAnalysis
                 }
                 chosenCols[col] = true;
                 chosenRows[row] = true;
-                for (int i = 0;i < iMax;i++)
+                for (int i = 0; i < iMax; i++)
                 {
                     if (i == row) continue;
                     double muCoef = matrix[i, col] / matrix[row, col];
                     //Console.WriteLine("muCoef : {0} ", muCoef);
-                    for(int j = 0; j < jMax;j++)
+                    for (int j = 0; j < jMax; j++)
                     {
                         matrix[i, j] = matrix[i, j] - muCoef * matrix[row, j];
                         if (Math.Abs(matrix[i, j]) < eps) matrix[i, j] = 0; // Rounding matrix at position to ensure no errors.
@@ -240,11 +240,11 @@ namespace NumericalAnalysis
                 PrintMatrix(matrix, true);
             }
             SwapColGaussJordan(chosenCols, ref matrix, out changedPos);
-            UpperTrapezoidSortSwap(null,ref matrix, out _firstPosDif0);
+            UpperTrapezoidSortSwap(null, ref matrix, out _firstPosDif0);
             PrintMatrix(matrix);
             return true;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -253,12 +253,12 @@ namespace NumericalAnalysis
         /// <param name="roots"></param>
         /// <param name="eps"></param>
         /// <returns></returns>
-        public static bool GaussJordanAddingRoots(ref double[,] processedMatrix, int[] firstPosDif0,int[] changedPos, out Dictionary<int, Dictionary<int, double>> roots, double? eps = null)
+        public static bool GaussJordanAddingRoots(ref double[,] processedMatrix, int[] firstPosDif0, int[] changedPos, out Dictionary<int, Dictionary<int, double>> roots, double? eps = null)
         {
             int iMax = processedMatrix.GetLength(0);
             int jMax = processedMatrix.GetLength(1);
             roots = new Dictionary<int, Dictionary<int, double>>();
-            
+
             if (firstPosDif0[firstPosDif0.Length - 1] > iMax - 1)
             {
                 roots = null;
@@ -272,12 +272,12 @@ namespace NumericalAnalysis
                     root.Add(changedPos[indexOfVar], 0);
                     //Console.WriteLine("Added x_{0}",indexOfVar);
                 }
-                for (int j = jMax-1; j >= firstPosDif0[i]; j--)
+                for (int j = jMax - 1; j >= firstPosDif0[i]; j--)
                 {
                     processedMatrix[i, j] = processedMatrix[i, j] / processedMatrix[i, firstPosDif0[i]];
                 }
                 PrintMatrix(processedMatrix, true);
-                for (int j = jMax-1; j > firstPosDif0[i]; j--)
+                for (int j = jMax - 1; j > firstPosDif0[i]; j--)
                 {
                     root[changedPos[j]] -= processedMatrix[i, j];
                 }
@@ -286,13 +286,13 @@ namespace NumericalAnalysis
             return true;
         }
 
-        public static void SwapColGaussJordan(bool[] chosenCols ,ref double[,] matrix, out int[] changedPos)
+        public static void SwapColGaussJordan(bool[] chosenCols, ref double[,] matrix, out int[] changedPos)
         {
             int jMax = matrix.GetLength(1);
             changedPos = new int[jMax];
-            for(int n = 0;n<jMax;n++)
+            for (int n = 0; n < jMax; n++)
             {
-                changedPos[n] = n; 
+                changedPos[n] = n;
             }
             for (int j = 0; j < jMax - 2; j++)
                 if (!chosenCols[j])
@@ -300,17 +300,17 @@ namespace NumericalAnalysis
                         if (chosenCols[dj])
                         {
                             SwapCol(ref matrix, j, dj);
-                            Swap(ref changedPos[j],ref changedPos[dj]);
+                            Swap(ref changedPos[j], ref changedPos[dj]);
                             PrintMatrix(matrix, true);
                             break;
                         }
         }
-        
+
         #endregion
 
         #region LU decomposition
 
-        public static bool LUmain(ref double[,]matrix)
+        public static bool LUmain(ref double[,] matrix)
         {
             int n = matrix.GetLength(0);
 
@@ -331,24 +331,24 @@ namespace NumericalAnalysis
             }
             for (int k = 0; k < n; k++)
             {
-                U[k,k] = matrix[k, k];
-                L[k,k] = 1;
+                U[k, k] = matrix[k, k];
+                L[k, k] = 1;
                 for (int i = k + 1; i < n; i++)
                 {
-                    L[i,k] = matrix[i,k] / U[k,k];
-                    U[k,i] = matrix[k,i];
-                    U[i,k] = 0;
-                    L[k,i] = 0;
+                    L[i, k] = matrix[i, k] / U[k, k];
+                    U[k, i] = matrix[k, i];
+                    U[i, k] = 0;
+                    L[k, i] = 0;
                 }
                 for (int i = k + 1; i < n; i++)
                     for (int j = k + 1; j < n; j++)
-                        matrix[i,j] = matrix[i,j] - L[i,k] * U[k,j];
+                        matrix[i, j] = matrix[i, j] - L[i, k] * U[k, j];
             }
-            PrintMatrix(matrix);PrintMatrix(U);PrintMatrix(L);
+            PrintMatrix(matrix); PrintMatrix(U); PrintMatrix(L);
             return true;
         }
 
-        public static bool MatrixMultiplier(double[,]leftMatrix, double[,] rightMatrix, out double[,] result)
+        public static bool MatrixMultiplier(double[,] leftMatrix, double[,] rightMatrix, out double[,] result)
         {
             int lNumRow = leftMatrix.GetLength(0);
             int lNumCol = leftMatrix.GetLength(1);
@@ -359,10 +359,10 @@ namespace NumericalAnalysis
                 result = null;
                 return false;
             }
-            result = new double[lNumRow, rNumCol]; 
-            for(int i = 0;i<lNumRow;i++)
+            result = new double[lNumRow, rNumCol];
+            for (int i = 0; i < lNumRow; i++)
             {
-                for(int j = 0;j<rNumCol;j++)
+                for (int j = 0; j < rNumCol; j++)
                 {
                     result[i, j] = 0;
                     for (int k = 0; k < lNumCol; k++)
@@ -386,15 +386,15 @@ namespace NumericalAnalysis
                 seed[n] = 0;
             }
             string s;
-            if (!JacobiIterativeMethod(ref matrix,seed,out double[] root, eps, out s))
+            if (!JacobiIterativeMethod(ref matrix, seed, out double[] root, eps, out s))
             {
-                Console.WriteLine(s); 
+                Console.WriteLine(s);
                 return;
             }
             PrintArray(root, true, "root");
         }
 
-        public static bool JacobiIterativeMethod(ref double[,] matrix ,double[] seed ,out double[] root, double eps, out string s)
+        public static bool JacobiIterativeMethod(ref double[,] matrix, double[] seed, out double[] root, double eps, out string s)
         {
             ChangeLastColSide(ref matrix);
 
@@ -408,11 +408,11 @@ namespace NumericalAnalysis
             }
             root = new double[iMax];
             double[] root2 = new double[iMax];
-            for (int k = 0; k < iMax; k++) 
+            for (int k = 0; k < iMax; k++)
             {
                 root2[k] = root[k];
             }
-            int itr =0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+            int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
             do
             {
                 for (int k = 0; k < iMax; k++)
@@ -430,7 +430,7 @@ namespace NumericalAnalysis
                     for (int j = 0; j < jMax; j++)
                     {
                         if (i == j) continue;
-                        if (j == jMax-1)
+                        if (j == jMax - 1)
                         {
                             temp -= matrix[i, j];
                             continue;
@@ -556,7 +556,7 @@ namespace NumericalAnalysis
         /// <typeparam name="T"></typeparam>
         /// <param name="firstPosDif0">Array of first position that is different from 0 in each row of matrix</param>
         /// <param name="matrix">Input matrix</param>
-        public static void UpperTrapezoidSortSwap<T>( int[] firstPosDif0, ref T[,] matrix, out int[] _firstPosDiff0)
+        public static void UpperTrapezoidSortSwap<T>(int[] firstPosDif0, ref T[,] matrix, out int[] _firstPosDiff0)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -579,13 +579,13 @@ namespace NumericalAnalysis
             }
 
             //SelectionSort
-            for (int i = 0; i< iMax;i++)
+            for (int i = 0; i < iMax; i++)
             {
                 int minIndex = i;
-                for (int j = i;j<iMax;j++)
+                for (int j = i; j < iMax; j++)
                 {
-                    if (firstPosDif0[minIndex] > firstPosDif0[j]) 
-                        minIndex = j;    
+                    if (firstPosDif0[minIndex] > firstPosDif0[j])
+                        minIndex = j;
                 }
                 if (i != minIndex)
                 {
@@ -595,7 +595,7 @@ namespace NumericalAnalysis
             }
 
             _firstPosDiff0 = firstPosDif0;
-        }    
+        }
 
         /// <summary>
         /// Swap 2 rows
@@ -608,7 +608,7 @@ namespace NumericalAnalysis
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            for(int j =0;j<jMax;j++)
+            for (int j = 0; j < jMax; j++)
             {
                 Swap(ref matrix[row1, j], ref matrix[row2, j]);
             }
@@ -626,12 +626,12 @@ namespace NumericalAnalysis
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            for(int i = 0; i< iMax;i++)
+            for (int i = 0; i < iMax; i++)
             {
                 Swap(ref matrix[i, col1], ref matrix[i, col2]);
             }
             return;
-        }    
+        }
 
         /// <summary>
         /// Swap 2 entities
@@ -644,9 +644,9 @@ namespace NumericalAnalysis
             T temp = a;
             a = b;
             b = temp;
-        }    
+        }
 
-        public static void PrintMatrix<T>( T[,] matrix)
+        public static void PrintMatrix<T>(T[,] matrix)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -674,12 +674,12 @@ namespace NumericalAnalysis
             Console.WriteLine();
         }
 
-        public static void PrintArray<T>(T[] array, bool printVertically =  false, string s = "array")
+        public static void PrintArray<T>(T[] array, bool printVertically = false, string s = "array")
         {
             if (!printVertically)
             {
                 int len = array.Length;
-                Console.Write("{0}: ",s);
+                Console.Write("{0}: ", s);
                 for (int i = 0; i < len; i++)
                     Console.Write(array[i].ToString());
                 Console.WriteLine();
@@ -689,7 +689,7 @@ namespace NumericalAnalysis
             Console.WriteLine("{0}: ", s);
             for (int i = 0; i < len2; i++)
             {
-                Console.WriteLine(array[i].ToString()+" ");
+                Console.WriteLine(array[i].ToString() + " ");
             }
         }
 
