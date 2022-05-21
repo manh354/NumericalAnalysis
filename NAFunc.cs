@@ -7,6 +7,7 @@ using Flee.PublicTypes;
 
 namespace NumericalAnalysis
 {
+    // Crucial Helper class to ensure good performance.
     public class NAFunc
     {
         string funcExpression;

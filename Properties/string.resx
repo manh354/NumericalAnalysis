@@ -120,6 +120,12 @@
   <data name="ConvertInputSuccess" xml:space="preserve">
     <value>Convert inputs successfully.</value>
   </data>
+  <data name="FailedChapter1_Bisection" xml:space="preserve">
+    <value>Bisection Method failed.</value>
+  </data>
+  <data name="FailedChapter1_FalsePos" xml:space="preserve">
+    <value>False Position Method failed.</value>
+  </data>
   <data name="FailedChapter1_FalsePosition_CannotFindMinMax" xml:space="preserve">
     <value>False Position method failed: failed to Find Min Max of f' on (a;b).</value>
   </data>
@@ -133,7 +139,13 @@
     <value>Failed Processing function f.</value>
   </data>
   <data name="FailedChapter1_GradIterator_FailedDerivative" xml:space="preserve">
-    <value>The gradient iterator failed to deriva</value>
+    <value>The gradient iterator failed to derivate</value>
+  </data>
+  <data name="FailedChapter1_Newton" xml:space="preserve">
+    <value>Newton Method failed.</value>
+  </data>
+  <data name="FailedChapter1_SingularIterative" xml:space="preserve">
+    <value>Singular Iterative Method failed.</value>
   </data>
   <data name="FailedChapter1_SingularIterative_CannotFindMinMax" xml:space="preserve">
     <value>Singular Iterative method failed: failed to find Min Max of f' on (a;b).</value>
@@ -158,5 +170,12 @@
 Type 2 to select False Position method 
 Type 3 to select Newton's method 
 Type 4 to select Singular Iterative method:</value>
+  </data>
+  <data name="TypeInChapter2Switch" xml:space="preserve">
+    <value>Type 1 to select Gauss method
+Type 2 to select Gauss Jordan method
+Type 3 to select LU decomposition
+Type 4 to select Jacobi method
+Type 5 to select Gauss-Seidel method</value>
   </data>
 </root>
