@@ -757,7 +757,7 @@ namespace NumericalAnalysis
             Console.WriteLine();
         }
 
-        public static void PrintMatrix(double[,] matrix, bool flippedLastCol = false)
+        public static void PrintMatrix(double[,] matrix, bool flippedLastCol)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
