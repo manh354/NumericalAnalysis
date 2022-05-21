@@ -70,6 +70,24 @@ namespace NumericalAnalysis.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bisection Method failed..
+        /// </summary>
+        internal static string FailedChapter1_Bisection {
+            get {
+                return ResourceManager.GetString("FailedChapter1_Bisection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to False Position Method failed..
+        /// </summary>
+        internal static string FailedChapter1_FalsePos {
+            get {
+                return ResourceManager.GetString("FailedChapter1_FalsePos", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to False Position method failed: failed to Find Min Max of f&apos; on (a;b)..
         /// </summary>
         internal static string FailedChapter1_FalsePosition_CannotFindMinMax {
@@ -106,11 +124,29 @@ namespace NumericalAnalysis.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The gradient iterator failed to deriva.
+        ///   Looks up a localized string similar to The gradient iterator failed to derivate.
         /// </summary>
         internal static string FailedChapter1_GradIterator_FailedDerivative {
             get {
                 return ResourceManager.GetString("FailedChapter1_GradIterator_FailedDerivative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Newton Method failed..
+        /// </summary>
+        internal static string FailedChapter1_Newton {
+            get {
+                return ResourceManager.GetString("FailedChapter1_Newton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Singular Iterative Method failed..
+        /// </summary>
+        internal static string FailedChapter1_SingularIterative {
+            get {
+                return ResourceManager.GetString("FailedChapter1_SingularIterative", resourceCulture);
             }
         }
         
@@ -177,6 +213,19 @@ namespace NumericalAnalysis.Properties {
         internal static string TypeInChapter1Switch {
             get {
                 return ResourceManager.GetString("TypeInChapter1Switch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type 1 to select Gauss method
+        ///Type 2 to select Gauss Jordan method
+        ///Type 3 to select LU decomposition
+        ///Type 4 to select Jacobi method
+        ///Type 5 to select Gauss-Seidel method.
+        /// </summary>
+        internal static string TypeInChapter2Switch {
+            get {
+                return ResourceManager.GetString("TypeInChapter2Switch", resourceCulture);
             }
         }
     }

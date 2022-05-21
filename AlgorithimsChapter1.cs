@@ -38,16 +38,19 @@ namespace NumericalAnalysis
             switch (s1)
             {
                 case "1":
-                    BisectionMethod(a,b,out root, f, eps.Value);
+                    if (!BisectionMethod(a, b, out root, f, eps.Value))
+                        Console.WriteLine(Properties._string.FailedChapter1_Bisection);
                     Console.WriteLine("Root: {0}", root);
                     break;
                 case "2":
-                    FalsePositionMethod(a, b, out root, f, df, ddf, eps.Value);
+                    if (!FalsePositionMethod(a, b, out root, f, df, ddf, eps.Value))
+                        Console.WriteLine(Properties._string.FailedChapter1_FalsePos);
                     Console.WriteLine("Root: {0}", root);
 
                     break;
                 case "3":
-                    NewtonMethod(a, b, out root, f, df, ddf, eps.Value);
+                    if(!NewtonMethod(a, b, out root, f, df, ddf, eps.Value))
+                        Console.WriteLine(Properties._string.FailedChapter1_Newton);
                     Console.WriteLine("Root: {0}", root);
                     break;
                 case "4":
@@ -56,10 +59,10 @@ namespace NumericalAnalysis
                     double.TryParse(Console.ReadLine(), out temp);
                     Console.WriteLine("Input functions q:");
                     double.TryParse(Console.ReadLine(), out temp2);
-                    SingularIterative(a, b, temp, out root, f, eps.Value, temp2);
+                    if (!SingularIterative(a, b, temp, out root, f, eps.Value, temp2))
+                        Console.WriteLine(Properties._string.FailedChapter1_SingularIterative);
                     break;
             }
-            if (root != null) Console.WriteLine(root);
         }
 
 
@@ -109,7 +112,7 @@ namespace NumericalAnalysis
 
         public static bool FalsePositionMethod(double? _a, double? _b, out double? root, Func<double, double> f, Func<double, double> df, Func<double, double> ddf, double eps = 1e-10)
         {
-            if (!InputProcessing(_a, _b, f))
+            if (!InputProcessing(_a, _b, f,df,ddf,true,true))
             {
                 root = null;
                 return false;
@@ -120,19 +123,32 @@ namespace NumericalAnalysis
             int fa_sign = Math.Sign(fa), fb_sign = Math.Sign(fa);
 
             //Find Max and min of df
-            double? m1=null, M1=null;
+            double? m1df = null, M1df = null, m1ddf = null, M1ddf = null;
+            bool? dfCS = null, ddfCS = null;
 
-            if (!FindBothYMaxMin(a, b, out M1, out m1, df, eps, default, false))
+            if (!FindBothYMaxMin(a, b, out m1df, out M1df, df, eps, safe: false))
             {
-                Console.WriteLine(Properties._string.FailedChapter1_SingularIterative_CannotFindMinMax);
-                root = null;
-                return false;
+                Console.WriteLine("Err: N-A1");
+            };
+            if (!FindBothYMaxMin(a, b, out m1ddf, out M1ddf, ddf, eps, safe: false))
+            {
+                Console.WriteLine("Err: N-A2");
             };
 
-            double eps0 = eps * m1.Value / (M1.Value - m1.Value);
+            if (m1df.Value * M1df.Value <= 0 || m1ddf.Value * M1ddf.Value <= 0)
+            {
+                Console.WriteLine("Err: N-B1");
+                root = null;
+                return false;
+            }
 
-            // Implement max min of df and ddf
+            AbsMaxMin(M1df, m1df, out M1df, out m1df);
+
+            double eps0 = eps * m1df.Value / (Math.Abs(M1df.Value) - m1df.Value);
+            Console.WriteLine("eps0:{0} ", eps0);
+
             double d, fd, x0, x1;
+
             if (fa_sign * ddf(a) > 0)
             {
                 d = a;
@@ -145,17 +161,23 @@ namespace NumericalAnalysis
                 fd = fb;
                 x0 = a;
             }
-            int itr = 0; long itrMax = Convert.ToInt64(1d / eps);
-            do
+
+            int itr = 0; int itrMax = Convert.ToInt32(1d / eps);
+
+            x1 = x0 - f(x0) * (x0 - d) / (f(x0) - fd);
+
+            while (Math.Abs(x1-x0)>=eps0)
             {
-                if (itr > itrMax)
+                if(itr>itrMax)
                 {
                     root = null;
                     return false;
                 }
+                x0 = x1;
                 x1 = x0 - f(x0) * (x0 - d) / (f(x0) - fd);
+                Console.WriteLine("iteration {0}: x1 = {1}", itr, x1);
                 itr++;
-            } while (x1 - x0 < eps0);
+            }    
             root = x1;
             return true;
         }
@@ -179,30 +201,41 @@ namespace NumericalAnalysis
             //Processing df and ddf
             if (!FindBothYMaxMin(a.Value, b.Value, out m1df, out M1df, df, eps, safe: false))
             {
+                Console.WriteLine("Err: N-A1");
+            }
 
-            };
-            FindBothYMaxMin(a.Value, b.Value, out m1ddf, out M1ddf, ddf, eps, safe: false);
-
-            if(m1df.Value*M1df.Value <= 0 || m1ddf.Value*M1df.Value <= 0)
+            if (!FindBothYMaxMin(a.Value, b.Value, out m1ddf, out M1ddf, ddf, eps, safe: false))
             {
+                Console.WriteLine("Err: N-A2");
+            }
+
+            if(m1df.Value*M1df.Value <= 0 || m1ddf.Value*M1ddf.Value <= 0)
+            {
+                Console.WriteLine("Err: N-B1");
                 root = null;
                 return false;
             }    
 
             //Processing new epsilon to compare.
             double eps0 = eps * m1df.Value;
+
             double x_0 = _seed, x_1;
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
-            do
+
+            x_1 = x_0 - f(x_0) / df(x_0);
+
+            while (Math.Abs(f(x_1)) >= eps0)
             {
                 if (itr > itrMax)
                 {
                     root = null;
                     return false;
                 }
+                x_0 = x_1;
                 x_1 = x_0 - f(x_0) / df(x_0);
+                Console.WriteLine("iteration {0}: x1 = {1}", itr, x_1);
                 itr++;
-            } while (Math.Abs(f(x_1))>=eps0);
+            };
             root = x_1;
             return true;
         }
@@ -226,9 +259,11 @@ namespace NumericalAnalysis
                 return false;
             }
             double x_0 = _seed.Value;
-            double x_1 = phi(x_0);
+
             double eps0 = eps * (q / (1 - q));
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+
+            double x_1 = phi(x_0);
             while (Math.Abs(x_1 - x_0) < eps0)
             {
                 if (itr > itrMax)
@@ -238,6 +273,7 @@ namespace NumericalAnalysis
                 }
                 x_0 = x_1;
                 x_1 = phi(0);
+                Console.WriteLine("iteration {0}: x1 = {1}", itr, x_1);
                 itr++;
             }
             root = x_1;

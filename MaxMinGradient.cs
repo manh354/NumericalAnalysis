@@ -34,7 +34,6 @@ namespace NumericalAnalysis
                     x0 = x1;
                     if (!nth_Derivative(x0, f, 1, out double? df, eps))
                     {
-                        Console.WriteLine();
                         x = null;
                         y = null;
                         return false;
@@ -106,7 +105,6 @@ namespace NumericalAnalysis
             double gamma = (b - a) / step;
             while ((seed += bias * (b - a) / step) < b)
             {
-                Console.WriteLine(seed);
                 double? x, y;
                 if (GradientIterator(a, b, seed, out x, out y, f, eps, gamma * 10, false))
                 {
@@ -132,6 +130,7 @@ namespace NumericalAnalysis
                     yMax = pair.Item2;
                 }
             }
+            Console.WriteLine("yMax: {0}", yMax);
             return true;
         }
 
@@ -151,7 +150,6 @@ namespace NumericalAnalysis
             double gamma = (b - a) / step;
             while ((seed += bias * (b - a) / step) < b)
             {
-                Console.WriteLine("Seed at: {0}", seed);
                 double? x, y;
                 if (GradientIterator(a, b, seed, out x, out y, f, eps, gamma * 10, true))
                 {
@@ -168,6 +166,7 @@ namespace NumericalAnalysis
                     if (bias > 1) bias--;
                     continue;
                 }
+                else bias++;
             }
             xMax = double.MaxValue;
             yMax = double.MaxValue;
@@ -195,5 +194,40 @@ namespace NumericalAnalysis
             return true;
         }
         #endregion
+
+        public static void AbsMaxMin(double max, double min, out double absMax, out double absMin)
+        {
+            if (max * min <= 0)
+            {
+                double temp1 = Math.Abs(max), temp2 = Math.Abs(min);
+                max = temp1 > temp2 ? temp1 : temp2;
+                min = 0;
+            }
+            else
+            {
+                double temp1 = Math.Abs(max), temp2 = Math.Abs(min);
+                max = temp1 > temp2 ? temp1 : temp2;
+                min = temp1 > temp2 ? temp2 : temp1;
+            }
+            absMax = max; absMin = min;
+        }
+        public static void AbsMaxMin(double? max, double? min, out double? absMax, out double? absMin)
+        {
+            if (max == null || min == null) { absMax = null; absMin = null; return; }
+            if (max * min <= 0)
+            {
+                double temp1 = Math.Abs(max.Value), temp2 = Math.Abs(min.Value);
+                max = temp1 > temp2 ? temp1 : temp2;
+                min = 0;
+            }
+            else
+            {
+                double temp1 = Math.Abs(max.Value), temp2 = Math.Abs(min.Value);
+                max = temp1 > temp2 ? temp1 : temp2;
+                min = temp1 > temp2 ? temp2 : temp1;
+            }
+            absMax = max; absMin = min;
+        }
+
     }
 }

@@ -120,6 +120,12 @@
   <data name="ConvertInputSuccess" xml:space="preserve">
     <value>Chuyển đổi đầu vào thành công.</value>
   </data>
+  <data name="FailedChapter1_Bisection" xml:space="preserve">
+    <value>Phương pháp chia đôi thất bại.</value>
+  </data>
+  <data name="FailedChapter1_FalsePos" xml:space="preserve">
+    <value>Phương pháp dây cung thất bại.</value>
+  </data>
   <data name="FailedChapter1_FalsePosition_CannotFindMinMax" xml:space="preserve">
     <value>Phương pháp dây cung thất bại: Không tìm được Max Min của f' trên (a;b)</value>
   </data>
@@ -131,6 +137,12 @@
   </data>
   <data name="FailedChapter1_Func_f" xml:space="preserve">
     <value>Không xử lý được phương trình f.</value>
+  </data>
+  <data name="FailedChapter1_Newton" xml:space="preserve">
+    <value>Phương pháp tiếp tuyến thất bại.</value>
+  </data>
+  <data name="FailedChapter1_SingularIterative" xml:space="preserve">
+    <value>Phương pháp lặp đơn thất bại.</value>
   </data>
   <data name="FailedChapter1_SingularIterative_CannotFindMinMax" xml:space="preserve">
     <value>Phương pháp lặp đơn thất bại: Không tìm được Max Min của f' trên (a;b)</value>
@@ -155,5 +167,12 @@
 Nhập 2 để chọn phương pháp dây cung 
 Nhập 3 để chọn phương pháp tiếp tuyến 
 Nhập 4 để chọn phương pháp lặp đơn</value>
+  </data>
+  <data name="TypeInChapter2Switch" xml:space="preserve">
+    <value>Nhập 1 để chọn phương pháp Gauss
+Nhập 2 để chọn phương pháp Gauss Jordan
+Nhập 3 để chọn phương pháp LU
+Nhập 4 để chọn phương pháp Lặp Jacobi
+Nhập 5 để chọn phương pháp Lặp Gauss-Seidel</value>
   </data>
 </root>
