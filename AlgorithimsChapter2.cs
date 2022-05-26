@@ -109,7 +109,7 @@ namespace NumericalAnalysis
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    Algorithms.SimpleIterativeMainEx(ref matrix7, seed7, 1e-5);
+                    // RESERVE FOR ExFuntions
                     break;
                 default:
                     break;
@@ -459,12 +459,13 @@ namespace NumericalAnalysis
 
 
         #region SimpleIterative
-        
+
         static public bool SimpleIterativeMain(ref double[,] matrix, double[] seed, double eps = 1e-7)
         {
-            if (!MatrixRefactorAndNormCheck(ref matrix, out double q))
+            if (!MatrixRefactorAndNormCheck(matrix, out double q, out int mode))
             { Console.WriteLine("Norm does not satisfy condition."); return false; }
-            if (!SimpleIterator(ref matrix, seed, q, out double[] root, eps, out string s))
+            //PrintMatrix(matrix);
+            if (!SimpleIterator(ref matrix, seed, mode, q, out double[] root, eps, out string s))
             {
                 Console.WriteLine(s);
                 return false;
@@ -472,37 +473,45 @@ namespace NumericalAnalysis
             return true;
         }
 
-        static public bool MatrixRefactorAndNormCheck(ref double[,] matrix, out double q)
+        static public bool MatrixRefactorAndNormCheck(double[,] matrix, out double q, out int mode)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
+
+            double[,] matrix2 = new double[iMax, jMax];
+            SetSameValue(matrix2, matrix);
 
             if (iMax != jMax - 1)
             {
                 Console.WriteLine("Not a square matrix");
                 q = -1;
+                mode = -1;
                 return false;
             }
-            for (int n = 0; n<iMax;n++)
+            for (int n = 0; n < iMax; n++)
             {
-                matrix[n, n] += 1;
-            }    
-            if(!MultiSINormCheck(matrix,out q))
+                matrix2[n, n] += 1;
+            }
+            if (!MultiSINormCheck(matrix2, out q))
             {
                 for (int n = 0; n < iMax; n++)
                 {
-                    matrix[n, n] -= 2;
+                    matrix2[n, n] -= 2;
                 }
-                if (!MultiSINormCheck(matrix, out q))
+                if (!MultiSINormCheck(matrix2, out q))
                 {
                     q = -1;
+                    mode = -1;
                     return false;
-                }    
+                }
+                mode = 2;
+                return true;
             }
+            mode = 1;
             return true;
         }
 
-        static public bool MultiSINormCheck(double [,] matrix, out double q)
+        public static bool MultiSINormCheck(double[,] matrix, out double q)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -514,7 +523,7 @@ namespace NumericalAnalysis
                 return false;
             }
             q = -1;
-            
+
             // Kiểm tra chuẩn vô cùng 
             MODE1:
             for (int i = 0; i < iMax; i++)
@@ -526,7 +535,7 @@ namespace NumericalAnalysis
                 }
                 if (sum >= 1)
                 {
-                    q = -1; 
+                    q = -1;
                     goto MODE2;
                 }
                 if (sum > q)
@@ -535,7 +544,7 @@ namespace NumericalAnalysis
 
             // Kiểm tra chuẩn 1
             MODE2:
-            for (int j = 0; j < jMax-1; j++)
+            for (int j = 0; j < jMax - 1; j++)
             {
                 double sum = 0;
                 for (int i = 0; i < iMax; i++)
@@ -553,59 +562,69 @@ namespace NumericalAnalysis
             return true;
         }
 
-        static public bool SimpleIterator(ref double[,] matrix, double[] seed, double q, out double[] root, double eps, out string s)
+        static public bool SimpleIterator(ref double[,] matrix, double[] seed, int mode, double q, out double[] root, double eps, out string s)
         {
-            ChangeLastColSide(ref matrix);
 
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
+            SeperatingAb(matrix, out double[,] A, out double[] b);
+
+            PrintMatrix(A); PrintArray(b);
 
             root = seed;
-            double[] root2 = new double[iMax];
-            for (int k = 0; k < iMax; k++)
-            {
-                root2[k] = root[k];
-            }
+            double[] root2 = new double[root.Length];
+            SetSameValue(root2, root);
+
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+
+            if (mode == 1) goto MODE1;
+            if (mode == 2) goto MODE2;
+
+            MODE1:
+            double[,] Alpha1 = AddMarixWithnT(A, 1);
+            double[] Beta1 = MulVectorWithN(b, -1);
+            //PrintMatrix(Alpha1);
             do
             {
-                for (int k = 0; k < iMax; k++)
-                {
-                    root[k] = root2[k];
-                }
                 if (itr > itrMax)
                 {
                     s = "Does not converge";
                     return false;
                 }
-                for (int i = 0; i < iMax; i++)
-                {
-                    double temp = 0;
-                    for (int j = 0; j < jMax; j++)
-                    {
-                        if (j == jMax - 1)
-                        {
-                            temp -= matrix[i, j];
-                            continue;
-                        }
-                        temp -= matrix[i, j] * root[j];
-                    }
-                    root2[i] = temp;
-                    //Console.WriteLine("temp2: " + root2[i]);
-                    //Console.WriteLine("temp: " + root[i]);
-                    //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
-                }
+                SetSameValue(root, root2);
+                root2 = Add2Vector(MulMatrixWithVector(Alpha1, root), Beta1);
                 itr++;
                 Console.WriteLine("itr:{0}", itr);
+                //PrintArray(root, true, "root");
                 PrintArray(root2, true, "root");
                 //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
             } while (!JacobiIterativeRootDistance(root, root2, eps));
-            ChangeLastColSide(ref matrix);
+            goto END;
+
+
+            MODE2:
+            double[,] Alpha2 = AddMarixWithnT(MulMatrixWithN(A, -1), 1);
+            //PrintMatrix(Alpha2);
+            do
+            {
+                if (itr > itrMax)
+                {
+                    s = "Does not converge";
+                    return false;
+                }
+                SetSameValue(root, root2);
+                root2 = Add2Vector(MulMatrixWithVector(Alpha2, root), b);
+                itr++;
+                Console.WriteLine("itr:{0}", itr);
+                //PrintArray(root, true, "root");
+                PrintArray(root2, true, "root");
+                //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
+            } while (!JacobiIterativeRootDistance(root, root2, eps));
+            goto END;
+            END:
             s = null;
             return true;
         }
 
-        
+
         #endregion
 
         #region JacobiIterative
