@@ -98,6 +98,19 @@ namespace NumericalAnalysis
                     }
                     Algorithms.SimpleIterativeMain(ref matrix6, seed6, 1e-5);
                     break;
+                case "7":
+                    Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
+                    Console.ReadLine();
+                    Console.WriteLine("Processing matrix");
+                    string fileLocation7 = @"MatrixInput.txt";
+                    double[,] matrix7;
+                    if (!InOutProcessing.MatrixInput(out matrix7, out double[] seed7, fileLocation7))
+                    {
+                        Console.WriteLine("Invalid Inputs");
+                        break;
+                    }
+                    Algorithms.SimpleIterativeMainEx(ref matrix7, seed7, 1e-5);
+                    break;
                 default:
                     break;
             }
@@ -441,29 +454,6 @@ namespace NumericalAnalysis
             return true;
         }
 
-        public static bool MatrixMultiplier(double[,] leftMatrix, double[,] rightMatrix, out double[,] result)
-        {
-            int lNumRow = leftMatrix.GetLength(0);
-            int lNumCol = leftMatrix.GetLength(1);
-            int rNumRow = rightMatrix.GetLength(0);
-            int rNumCol = rightMatrix.GetLength(1);
-            if (lNumCol != rNumRow)
-            {
-                result = null;
-                return false;
-            }
-            result = new double[lNumRow, rNumCol];
-            for (int i = 0; i < lNumRow; i++)
-            {
-                for (int j = 0; j < rNumCol; j++)
-                {
-                    result[i, j] = 0;
-                    for (int k = 0; k < lNumCol; k++)
-                        result[i, j] += leftMatrix[i, k] * rightMatrix[k, j];
-                }
-            }
-            return true;
-        }
 
         #endregion
 
@@ -563,14 +553,14 @@ namespace NumericalAnalysis
             return true;
         }
 
-        static public bool SimpleIterator(ref double[,] matrix, double[] seed, double q ,out double[] root, double eps, out string s)
+        static public bool SimpleIterator(ref double[,] matrix, double[] seed, double q, out double[] root, double eps, out string s)
         {
             ChangeLastColSide(ref matrix);
 
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            
-            root = new double[iMax];
+
+            root = seed;
             double[] root2 = new double[iMax];
             for (int k = 0; k < iMax; k++)
             {
@@ -614,6 +604,8 @@ namespace NumericalAnalysis
             s = null;
             return true;
         }
+
+        
         #endregion
 
         #region JacobiIterative
@@ -992,142 +984,5 @@ namespace NumericalAnalysis
 
         #endregion
 
-        #region Utilities
-
-        /// <summary>
-        /// Sort array to a upper trapezoidial form.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="firstPosDif0">Array of first position that is different from 0 in each row of matrix</param>
-        /// <param name="matrix">Input matrix</param>
-        public static void UpperTrapezoidSortSwap<T>(int[] firstPosDif0, ref T[,] matrix, out int[] _firstPosDiff0)
-        {
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-
-            if (firstPosDif0 == null)
-            {
-                firstPosDif0 = new int[iMax]; // First position that is different from 0
-                for (int i = 0; i < iMax; i++)
-                {
-                    firstPosDif0[i] = 0;
-                    for (int j = 0; j < jMax; j++)
-                    {
-                        if (!matrix[i, j].Equals(0d))
-                        {
-                            firstPosDif0[i] = j;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            //SelectionSort
-            for (int i = 0; i < iMax; i++)
-            {
-                int minIndex = i;
-                for (int j = i; j < iMax; j++)
-                {
-                    if (firstPosDif0[minIndex] > firstPosDif0[j])
-                        minIndex = j;
-                }
-                if (i != minIndex)
-                {
-                    Swap(ref firstPosDif0[minIndex], ref firstPosDif0[i]);
-                    SwapRow(ref matrix, minIndex, i);
-                }
-            }
-
-            _firstPosDiff0 = firstPosDif0;
-        }
-
-        /// <summary>
-        /// Swap 2 rows
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="matrix">Input matrix</param>
-        /// <param name="row1">First row</param>
-        /// <param name="row2">Second row</param>
-        public static void SwapRow<T>(ref T[,] matrix, int row1, int row2)
-        {
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-            for (int j = 0; j < jMax; j++)
-            {
-                Swap(ref matrix[row1, j], ref matrix[row2, j]);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Swap 2 columns
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="matrix">Input matrix</param>
-        /// <param name="col1">First Column</param>
-        /// <param name="col2">Second Column</param>
-        public static void SwapCol<T>(ref T[,] matrix, int col1, int col2)
-        {
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-            for (int i = 0; i < iMax; i++)
-            {
-                Swap(ref matrix[i, col1], ref matrix[i, col2]);
-            }
-            return;
-        }
-
-        /// <summary>
-        /// Swap 2 entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="a">Entity 1</param>
-        /// <param name="b">Entity 2</param>
-        public static void Swap<T>(ref T a, ref T b)
-        {
-            T temp = a;
-            a = b;
-            b = temp;
-        }
-
-        public static void PrintMatrix(double[,] matrix, bool flippedLastCol = false)
-        {
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-            for (int i = 0; i < iMax; i++)
-            {
-                for (int j = 0; j < jMax; j++)
-                {
-                    if (flippedLastCol && j == jMax - 1)
-                    {
-                        Console.Write((-matrix[i, j]) + " ");
-                    }
-                    else Console.Write(matrix[i, j] + " ");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-        }
-
-        public static void PrintArray<T>(T[] array, bool printVertically = false, string s = "array")
-        {
-            if (!printVertically)
-            {
-                int len = array.Length;
-                Console.Write("{0}: ", s);
-                for (int i = 0; i < len; i++)
-                    Console.Write(array[i].ToString());
-                Console.WriteLine();
-                return;
-            }
-            int len2 = array.Length;
-            Console.WriteLine("{0}: ", s);
-            for (int i = 0; i < len2; i++)
-            {
-                Console.WriteLine(array[i].ToString() + " ");
-            }
-        }
-
-        #endregion
     }
 }
