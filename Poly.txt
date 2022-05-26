@@ -1,1 +1,3 @@
-﻿
+﻿// Nhập hệ số đa thức từ a0 đến an, không được có số 0 ở cuối
+coefs:1 -2 1
+eps:1e-5

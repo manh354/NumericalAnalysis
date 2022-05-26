@@ -77,6 +77,11 @@ namespace NumericalAnalysis
             int itr = 0; int maxItr = 5 * (int)(1 / eps);
             while (Math.Abs(a - b) >= eps)
             {
+                if (itr > maxItr)
+                {
+                    root = null;
+                    return false;
+                }
                 c = (a + b) / 2;
                 double fa = f(a); int Sign_fa = Math.Sign(fa);
                 double fc = f(c);
@@ -90,12 +95,8 @@ namespace NumericalAnalysis
                     a = c;
                 }
                 else b = c;
-                if (itr > maxItr)
-                {
-                    root = null;
-                    return false;
-                }
                 itr++;
+                Console.WriteLine("iteration {0}: c = {1}", itr, c);
             }
             root = c;
             return true;
@@ -310,6 +311,7 @@ namespace NumericalAnalysis
             return false;
 
         }
+
 
         #endregion
     }

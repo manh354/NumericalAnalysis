@@ -132,7 +132,7 @@ namespace NumericalAnalysis
                 int len = array.Length;
                 Console.Write("{0}: ", s);
                 for (int i = 0; i < len; i++)
-                    Console.Write(array[i].ToString());
+                    Console.Write(array[i].ToString() + " ");
                 Console.WriteLine();
                 return;
             }

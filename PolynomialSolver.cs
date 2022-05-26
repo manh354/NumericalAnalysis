@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SMath = System.Math;
 
 namespace NumericalAnalysis
 {
@@ -31,12 +30,12 @@ namespace NumericalAnalysis
                 return true;
             }
             //Main recursive loop
-            if (PolySolverRecursive(PolyDerivative(coef), eps, out roots))
+            if (PolySolverRecursive(PolyDerivative(coef), eps/5 ,out roots))
             {
                 BisectionRootsFinder(coef, roots, eps, out roots);
                 return true;
             }
-            else return false;
+            else return false; 
 
         }
 
@@ -55,7 +54,7 @@ namespace NumericalAnalysis
         {
             roots = new Dictionary<int, double>();
             int num = extremums.Count + 1; //Number of iterations.
-            double root_radius = 1 + SMath.Abs(coef.Max()) / coef[coef.Length - 1];
+            double root_radius = 1 + Math.Abs(coef.Max()) / coef[coef.Length - 1];
             int index = 0;
             for (int i = 0; i < num; i++)
             {
@@ -64,6 +63,13 @@ namespace NumericalAnalysis
                 b = (i + 1 == num) ? root_radius : extremums[i];
                 if (BisectionRootFinder(coef, a, b, eps, out double root))
                 {
+                    if (index > 0)
+                        if (Math.Abs(roots[index - 1] - root) >= eps)
+                        {
+                            roots.Add(index, root);
+                            ++index;
+                            continue;
+                        }
                     roots.Add(index, root);
                     ++index;
                 }
@@ -73,13 +79,18 @@ namespace NumericalAnalysis
 
         public static bool BisectionRootFinder(double[] coef, double a, double b, double eps, out double root)
         {
-            int maxItr = (int)SMath.Log2(1 / eps) * 500;
+            int maxItr = (int)Math.Log2(1 / eps) * 500;
             if (PolyValueCalc(coef, a) * PolyValueCalc(coef, b) > 0)
             {
                 root = double.NaN;
                 return false;
             };
-            int sign = SMath.Sign(PolyValueCalc(coef, a));
+            if(Math.Abs(PolyValueCalc(coef,a)) < eps )
+            {
+                root = a;
+                return true;
+            }    
+            int sign = Math.Sign(PolyValueCalc(coef, a));
             int itr = 0;
             double c, z;
             do
@@ -99,8 +110,9 @@ namespace NumericalAnalysis
                     root = float.NaN;
                     return false;
                 }
-            } while (SMath.Abs(b - a) >= eps);
+            } while (Math.Abs(b - a) >= eps);
             root = c;
+            Console.WriteLine(c);
             return true;
         }
 

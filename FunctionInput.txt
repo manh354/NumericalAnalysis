@@ -1,6 +1,9 @@
-﻿a:1
+﻿// Nhập khoảng cách ly nghiệm (a,b)
+a:1
 b:5
+//Nhập sai số epsilon = error
 eps:1e-5
+// Nhập phương trình f, f' và f"
 f:log(x)-1
 df:1/x
 ddf:-1/(x*x)

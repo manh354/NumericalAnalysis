@@ -24,6 +24,9 @@ namespace NumericalAnalysis
                     case "2":
                         Algorithms.Chapter2Main();
                         break;
+                    case "3":
+                        LowPrecision.BT4();
+                        break;
                     case "break":
                         goto BREAK;
                         break;

@@ -19,6 +19,7 @@ namespace NumericalAnalysis
             using StreamReader sr = File.OpenText(fileLocation);
             while ((_s = sr.ReadLine()) != null)
             {
+                if (s.Contains("//")) continue;
                 s.Enqueue(_s);
                 if (_s.Contains("seed:")) continue;
                 iMax++;
@@ -115,6 +116,7 @@ namespace NumericalAnalysis
             string s;
             while ((s = sr.ReadLine()) != null)
             {
+                if (s.Contains("//")) continue;
                 _s.Enqueue(s);
             }
             Queue<string> _sprocessed = new Queue<string>();
@@ -140,6 +142,7 @@ namespace NumericalAnalysis
                         Console.WriteLine(Properties._string.FailedChapter1_Var_a);
                         a = null;
                     }
+                    continue;
                 }
                 if (s2.Contains("b:"))
                 {
@@ -151,6 +154,7 @@ namespace NumericalAnalysis
                         Console.WriteLine(Properties._string.FailedChapter1_Var_b);
                         b = null;
                     }
+                    continue;
                 }
                 if (s2.Contains("eps:"))
                 {
@@ -162,24 +166,28 @@ namespace NumericalAnalysis
                         Console.WriteLine(Properties._string.FailedChapter1_Var_eps);
                         eps = null;
                     }
+                    continue;
                 }
                 if (s2.Contains("f:") && (!s2.Contains("df:")))
                 {
                     f = new NAFunc(s2.Replace("f:", null));
                     if (f == null)
                         Console.WriteLine(Properties._string.FailedChapter1_Func_f);
+                    continue;
                 }
                 if (s2.Contains("df:") && (!s2.Contains("ddf:")))
                 {
                     df = new NAFunc(s2.Replace("df:", null));
                     if (df == null)
                         Console.WriteLine(Properties._string.FailedChapter1_Func_df);
+                    continue;
                 }
                 if (s2.Contains("ddf:"))
                 {
                     ddf = new NAFunc(s2.Replace("ddf:", null));
                     if (ddf == null)
                         Console.WriteLine(Properties._string.FailedChapter1_Func_ddf);
+                    continue;
                 }
             }
             if (a == null || b == null || eps == null || f == null || df == null || ddf == null)
@@ -187,5 +195,66 @@ namespace NumericalAnalysis
             return true;
         }
 
+        public static bool PolyInput(out List<double> coefs, out double? eps, string fileLocation = @"Poly.txt")
+        {
+            if (!File.Exists(fileLocation))
+            {
+                File.Create(fileLocation);
+                Console.WriteLine(Properties._string.NoInputFileChapter1);
+                eps = null;
+                coefs= null;
+                return false;
+            }
+            eps = null;
+            coefs = new List<double>();
+
+            Queue<string> _s = new Queue<string>();
+            using StreamReader sr = File.OpenText(fileLocation);
+            string s;
+            while ((s = sr.ReadLine()) != null)
+            {
+                if (s.Contains("//")) continue;
+                _s.Enqueue(s);
+            }
+            Queue<string> _sprocessed = new Queue<string>();
+            while (_s.Count != 0)
+            {
+                _sprocessed.Enqueue(_s.Dequeue().Trim());
+            }
+            while (_sprocessed.Count!=0)
+            {
+                string s2 = _sprocessed.Dequeue();
+                if(s2.Contains("coefs:"))
+                {
+                    string[] scoefs = s2.Replace("coefs:", null).Split(" ");
+                    foreach(string s4 in scoefs)
+                    {
+                        double temp;
+                        if (!double.TryParse(s4, out temp))
+                        {
+                            coefs = null;
+                            break;
+                        }
+                        coefs.Add(temp);
+                    }    
+                }
+                if (s2.Contains("eps:"))
+                {
+                    double temp;
+                    //Console.WriteLine("Processing eps");
+                    if (double.TryParse(s2.Replace("eps:", null), out temp))
+                        eps = temp;
+                    else
+                    {
+                        Console.WriteLine(Properties._string.FailedChapter1_Var_eps);
+                        eps = null;
+                    }
+                    continue;
+                }
+            }
+            if ( eps == null || coefs == null)
+                return false;
+            return true;
+        }
     }
 }

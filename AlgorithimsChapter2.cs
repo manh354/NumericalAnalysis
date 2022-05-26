@@ -187,10 +187,11 @@ namespace NumericalAnalysis
                             updateFirstPosDiff = j + 1;
                         }
                     }
-                    PrintMatrix(matrix, true);
                     firstPosDif0[di] = updateFirstPosDiff;
-                    PrintArray(firstPosDif0);
                 }
+                Console.WriteLine("itr: {0}", i + 1);
+                PrintMatrix(matrix, true);
+                PrintArray(firstPosDif0,s:"First position that is different from 0:");
             }
             _firstPosDif0 = firstPosDif0;
             //PrintMatrix(matrix);
@@ -323,7 +324,9 @@ namespace NumericalAnalysis
                         if (chosenCols[j]) continue;
                         if (Math.Abs(matrix[i, j]) == 1)
                         {
-                            maxOfMatrix = matrix[i, j];
+                            row = i;
+                            col = j;
+                            goto NEXT;
                         }
                         if (maxOfMatrix < Math.Abs(matrix[i, j]))
                         {
@@ -333,6 +336,7 @@ namespace NumericalAnalysis
                         }
                     }
                 }
+                NEXT:
                 chosenCols[col] = true;
                 chosenRows[row] = true;
                 for (int i = 0; i < iMax; i++)
