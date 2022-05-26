@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using Flee.PublicTypes;
 
 namespace NumericalAnalysis
 {
     public class InOutProcessing
     {
-        public static bool MatrixInput(out double[,] matrix, out double[] seed ,string fileLocation =@"MatrixInput.txt" )
+        public static bool MatrixInput(out double[,] matrix, out double[] seed, string fileLocation = @"MatrixInput.txt")
         {
             if (!File.Exists(fileLocation))
             {
@@ -18,7 +14,7 @@ namespace NumericalAnalysis
                 File.Create(fileLocation);
                 Console.WriteLine("Input file not detected, created file: MatrixInput.txt at .exe containing folder.");
             }
-            int iMax=0, jMax;
+            int iMax = 0, jMax;
             Queue<string> s = new Queue<string>(); string _s;
             using StreamReader sr = File.OpenText(fileLocation);
             while ((_s = sr.ReadLine()) != null)
@@ -27,7 +23,7 @@ namespace NumericalAnalysis
                 if (_s.Contains("seed:")) continue;
                 iMax++;
             }
-            if(iMax ==0)
+            if (iMax == 0)
             {
                 matrix = null;
                 seed = null;
@@ -38,15 +34,16 @@ namespace NumericalAnalysis
             string[] sseed = null;
             seed = new double[iMax];
 
-            foreach(string rowRaw in s)
+            foreach (string rowRaw in s)
             {
-                if(rowRaw.Contains("seed:"))
+                rowRaw.Trim();
+                if (rowRaw.Contains("seed:"))
                 {
                     rowRaw.Trim();
-                    rowRaw.Replace("seed:", null);
+                    rowRaw.Remove(0, 4);
                     sseed = rowRaw.Split(' ');
                     continue;
-                }    
+                }
                 s_processed.Enqueue(rowRaw.Split(' '));
             }
             jMax = s_processed.Peek().Length;
@@ -56,7 +53,7 @@ namespace NumericalAnalysis
             foreach (string[] row in s_processed)
             {
                 int j = 0;
-                foreach(string elem in row)
+                foreach (string elem in row)
                 {
                     double temp;
                     if (!double.TryParse(elem, out temp))
@@ -73,11 +70,11 @@ namespace NumericalAnalysis
             int l = 0;
             foreach (string elem in sseed)
             {
+                Console.WriteLine("elem: {0}", elem);
                 double temp;
-                if(!double.TryParse(elem,out temp))
+                if (!double.TryParse(elem, out temp))
                 {
-                    seed = null;
-                    break;
+                    continue;
                 }
                 else
                 {
@@ -87,18 +84,18 @@ namespace NumericalAnalysis
             }
             return true;
         }
-        public static void MatrixRootOutput(Dictionary<int,Dictionary<int,double>> roots, int maxRoot)
+        public static void MatrixRootOutput(Dictionary<int, Dictionary<int, double>> roots, int maxRoot)
         {
-            foreach(KeyValuePair<int, Dictionary<int,double>> root in roots )
+            foreach (KeyValuePair<int, Dictionary<int, double>> root in roots)
             {
-                Console.Write("x{0} = ",root.Key+1);
-                foreach(KeyValuePair<int,double> variable in root.Value)
+                Console.Write("x{0} = ", root.Key + 1);
+                foreach (KeyValuePair<int, double> variable in root.Value)
                 {
                     if (variable.Value == 0) continue;
                     if (variable.Key == maxRoot)
                         Console.Write(" {0} ", variable.Value);
                     else
-                        Console.Write(" {0}*x{1} ", variable.Value, variable.Key+1);
+                        Console.Write(" {0}*x{1} ", variable.Value, variable.Key + 1);
                 }
                 Console.WriteLine();
             }

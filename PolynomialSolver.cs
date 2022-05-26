@@ -15,9 +15,9 @@ namespace NumericalAnalysis
         /// <param name="coef"> coefficent : a0 + a1.x + a2.x^2 + .... + an.x^n = 0.</param>
         /// <param name="roots"></param>
         /// <returns></returns>
-        public static bool PolySolverRecursive(float[] coef, float eps, out Dictionary<int, float> roots)
+        public static bool PolySolverRecursive(double[] coef, double eps, out Dictionary<int, double> roots)
         {
-            roots = new Dictionary<int, float>();
+            roots = new Dictionary<int, double>();
             if (coef.Length < 2)
             {
                 Console.WriteLine("INVALID: ARRAY LENGTH < 2");
@@ -41,9 +41,9 @@ namespace NumericalAnalysis
         }
 
 
-        public static float[] PolyDerivative(float[] coef)
+        public static double[] PolyDerivative(double[] coef)
         {
-            float[] new_coef = new float[coef.Length - 1];
+            double[] new_coef = new double[coef.Length - 1];
             for (int i = 0; i < coef.Length - 1; i++)
             {
                 new_coef[i] = coef[i + 1] * (i + 1);
@@ -51,18 +51,18 @@ namespace NumericalAnalysis
             return new_coef;
         }
 
-        public static bool BisectionRootsFinder(float[] coef, Dictionary<int, float> extremums, float eps, out Dictionary<int, float> roots)
+        public static bool BisectionRootsFinder(double[] coef, Dictionary<int, double> extremums, double eps, out Dictionary<int, double> roots)
         {
-            roots = new Dictionary<int, float>();
+            roots = new Dictionary<int, double>();
             int num = extremums.Count + 1; //Number of iterations.
-            float root_radius = 1 + SMath.Abs(coef.Max()) / coef[coef.Length - 1];
+            double root_radius = 1 + SMath.Abs(coef.Max()) / coef[coef.Length - 1];
             int index = 0;
             for (int i = 0; i < num; i++)
             {
-                float a, b;
+                double a, b;
                 a = (i == 0) ? -root_radius : extremums[i - 1];
                 b = (i + 1 == num) ? root_radius : extremums[i];
-                if (BisectionRootFinder(coef, a, b, eps, out float root))
+                if (BisectionRootFinder(coef, a, b, eps, out double root))
                 {
                     roots.Add(index, root);
                     ++index;
@@ -71,17 +71,17 @@ namespace NumericalAnalysis
             return true;
         }
 
-        public static bool BisectionRootFinder(float[] coef, float a, float b, float eps, out float root)
+        public static bool BisectionRootFinder(double[] coef, double a, double b, double eps, out double root)
         {
             int maxItr = (int)SMath.Log2(1 / eps) * 500;
             if (PolyValueCalc(coef, a) * PolyValueCalc(coef, b) > 0)
             {
-                root = float.NaN;
+                root = double.NaN;
                 return false;
             };
             int sign = SMath.Sign(PolyValueCalc(coef, a));
             int itr = 0;
-            float c, z;
+            double c, z;
             do
             {
                 itr++;
@@ -111,10 +111,10 @@ namespace NumericalAnalysis
         /// <param name="coef">Array of coefficients: a0, a1,..., an </param>
         /// <param name="x">Value of x</param>
         /// <returns></returns>
-        public static float PolyValueCalc(float[] coef, float x)
+        public static double PolyValueCalc(double[] coef, double x)
         {
-            float sum = 0;
-            float temp = 1;
+            double sum = 0;
+            double temp = 1;
             for (int i = 0; i < coef.Length; i++)
             {
                 sum += coef[i] * temp;

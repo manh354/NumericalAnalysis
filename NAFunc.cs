@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Flee.PublicTypes;
+﻿using Flee.PublicTypes;
+using System;
 
 namespace NumericalAnalysis
 {
@@ -29,7 +25,7 @@ namespace NumericalAnalysis
             context.Variables["x"] = x;
             return eGeneric.Evaluate();
         }
-        public Func<double,double> ToFunc()
+        public Func<double, double> ToFunc()
         {
             return InternalFunc;
         }

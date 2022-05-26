@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Globalization;
+using System.Threading;
 
 
 namespace NumericalAnalysis
@@ -25,7 +24,7 @@ namespace NumericalAnalysis
                     case "2":
                         Algorithms.Chapter2Main();
                         break;
-                    case"break":
+                    case "break":
                         goto BREAK;
                         break;
                 }

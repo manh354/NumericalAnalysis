@@ -13,7 +13,7 @@ namespace NumericalAnalysis
             double.TryParse(Console.ReadLine(), out a);
             double.TryParse(Console.ReadLine(), out b);
             double.TryParse(Console.ReadLine(), out eps);
-            
+
         }
 
 
@@ -80,15 +80,15 @@ namespace NumericalAnalysis
         {
             Console.WriteLine("Input n, coefficients from a0 to an, eps: ");
             int n; Int32.TryParse(Console.ReadLine(), out n);
-            float[] coef = new float[n + 1];
+            double[] coef = new double[n + 1];
             for (int i = 0; i < n + 1; i++)
             {
                 Console.Write("a[{0}]: ", i);
-                float.TryParse(Console.ReadLine(), out coef[i]);
+                double.TryParse(Console.ReadLine(), out coef[i]);
             }
             Console.Write("eps: ");
-            float eps; float.TryParse(Console.ReadLine(), out eps);
-            Dictionary<int, float> result;
+            double eps; double.TryParse(Console.ReadLine(), out eps);
+            Dictionary<int, double> result;
             if (PolynomialSolver.PolySolverRecursive(coef, eps, out result))
             {
                 if (result.Count == 0)
@@ -96,7 +96,7 @@ namespace NumericalAnalysis
                     Console.WriteLine("The Given Function Does Not Has Any Real Solutions!");
                     return;
                 }
-                foreach (KeyValuePair<int, float> a in result)
+                foreach (KeyValuePair<int, double> a in result)
                 {
                     Console.WriteLine("ROOT[{0}]: {1}", a.Key, a.Value);
                 }

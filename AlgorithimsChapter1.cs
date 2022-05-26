@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NumericalAnalysis
 {
@@ -49,7 +45,7 @@ namespace NumericalAnalysis
 
                     break;
                 case "3":
-                    if(!NewtonMethod(a, b, out root, f, df, ddf, eps.Value))
+                    if (!NewtonMethod(a, b, out root, f, df, ddf, eps.Value))
                         Console.WriteLine(Properties._string.FailedChapter1_Newton);
                     Console.WriteLine("Root: {0}", root);
                     break;
@@ -105,14 +101,14 @@ namespace NumericalAnalysis
             return true;
         }
 
-        
+
         #endregion
 
         #region FalsePosition
 
         public static bool FalsePositionMethod(double? _a, double? _b, out double? root, Func<double, double> f, Func<double, double> df, Func<double, double> ddf, double eps = 1e-10)
         {
-            if (!InputProcessing(_a, _b, f,df,ddf,true,true))
+            if (!InputProcessing(_a, _b, f, df, ddf, true, true))
             {
                 root = null;
                 return false;
@@ -166,9 +162,9 @@ namespace NumericalAnalysis
 
             x1 = x0 - f(x0) * (x0 - d) / (f(x0) - fd);
 
-            while (Math.Abs(x1-x0)>=eps0)
+            while (Math.Abs(x1 - x0) >= eps0)
             {
-                if(itr>itrMax)
+                if (itr > itrMax)
                 {
                     root = null;
                     return false;
@@ -177,7 +173,7 @@ namespace NumericalAnalysis
                 x1 = x0 - f(x0) * (x0 - d) / (f(x0) - fd);
                 Console.WriteLine("iteration {0}: x1 = {1}", itr, x1);
                 itr++;
-            }    
+            }
             root = x1;
             return true;
         }
@@ -186,7 +182,7 @@ namespace NumericalAnalysis
 
         #region NewtonMethod
 
-        public static bool NewtonMethod(double? a, double? b, out double? root, Func<double, double> f, Func<double, double> df,Func<double,double> ddf, double eps)
+        public static bool NewtonMethod(double? a, double? b, out double? root, Func<double, double> f, Func<double, double> df, Func<double, double> ddf, double eps)
         {
             if (!InputProcessing(a, b, f, df, ddf, true, true))
             {
@@ -195,7 +191,7 @@ namespace NumericalAnalysis
             }
             int sign = Math.Sign(f(a.Value));
             double _seed = sign > 0 ? a.Value : b.Value;
-            double ? m1df, M1df;
+            double? m1df, M1df;
             double? m1ddf, M1ddf;
 
             //Processing df and ddf
@@ -209,12 +205,12 @@ namespace NumericalAnalysis
                 Console.WriteLine("Err: N-A2");
             }
 
-            if(m1df.Value*M1df.Value <= 0 || m1ddf.Value*M1ddf.Value <= 0)
+            if (m1df.Value * M1df.Value <= 0 || m1ddf.Value * M1ddf.Value <= 0)
             {
                 Console.WriteLine("Err: N-B1");
                 root = null;
                 return false;
-            }    
+            }
 
             //Processing new epsilon to compare.
             double eps0 = eps * m1df.Value;
@@ -251,7 +247,7 @@ namespace NumericalAnalysis
         /// <param name="root"></param>
         /// <param name="phi"></param>
         /// <returns></returns>
-        public static bool SingularIterative(double? a, double? b,double? _seed, out double? root, Func<double, double> phi, double eps, double q)
+        public static bool SingularIterative(double? a, double? b, double? _seed, out double? root, Func<double, double> phi, double eps, double q)
         {
             if (!InputProcessing(a, b, phi, null, null, true, false))
             {
