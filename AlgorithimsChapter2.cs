@@ -109,7 +109,7 @@ namespace NumericalAnalysis
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    // RESERVE FOR ExFuntions
+                    //
                     break;
                 default:
                     break;
@@ -575,6 +575,8 @@ namespace NumericalAnalysis
 
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
 
+            double eps0 = eps * (1 - q) / q;
+
             if (mode == 1) goto MODE1;
             if (mode == 2) goto MODE2;
 
@@ -647,7 +649,7 @@ namespace NumericalAnalysis
             {
                 JacobiNormalizeByRow(ref matrix);
                 // HORIBLE CODING PRACTICE
-                JacobiMatrixNormCheck(matrix, out q); 
+                JacobiMatrixNormCheck(matrix, out q);
                 string s;
                 if (!JacobiIterativeRow(ref matrix, seed, out root, q, eps, out s))
                 {
@@ -768,64 +770,36 @@ namespace NumericalAnalysis
         // Ma trận chéo chội hàng
         public static bool JacobiIterativeRow(ref double[,] matrix, double[] seed, out double[] root, double q, double eps, out string s)
         {
-            ChangeLastColSide(ref matrix);
-
-            PrintMatrix(matrix, true);
-
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            if (iMax != jMax - 1)
-            {
-                s = "Not a square matrix";
-                root = null;
-                return false;
-            }
+
+            SeperatingAb(matrix, out double[,] A, out double[] b);
+
             root = seed;
             double[] root2 = new double[iMax];
-            for (int k = 0; k < iMax; k++)
-            {
-                root2[k] = root[k];
-            }
+            SetSameValue(root2, root);
 
             double eps0 = eps * ((1 - q) / q);
 
             Console.WriteLine("eps0: {0}", eps0);
 
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+
+            double[,] Alpha = AddMarixWithnT(MulMatrixWithN(A, -1), 1); // alpha = I-A
+
             do
             {
-                for (int k = 0; k < iMax; k++)
-                {
-                    root[k] = root2[k];
-                }
+                SetSameValue(root, root2); // Means root = root2
                 if (itr > itrMax)
                 {
                     s = "Does not converge";
                     return false;
                 }
-                for (int i = 0; i < iMax; i++)
-                {
-                    double temp = 0;
-                    for (int j = 0; j < jMax; j++)
-                    {
-                        if (j == i) continue;
-                        if (j == jMax - 1)
-                        {
-                            temp -= matrix[i, j];
-                            continue;
-                        }
-                        temp -= matrix[i, j] * root[j];
-                    }
-                    root2[i] = temp;
-                    //Console.WriteLine("temp2: " + root2[i]);
-                    //Console.WriteLine("temp: " + root[i]);
-                    //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
-                }
+                root2 = Add2Vector(MulMatrixWithVector(Alpha, root), b); // x = alpha*x+b
                 itr++;
                 PrintArray(root2, true, "root");
                 //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
             } while (!JacobiIterativeRootDistance(root, root2, eps0));
-            ChangeLastColSide(ref matrix);
             s = null;
             return true;
         }
@@ -833,22 +807,14 @@ namespace NumericalAnalysis
         // Ma trận chéo chội cột
         public static bool JacobiIterativeCol(ref double[,] matrix, double[] seed, double[] diag, out double[] root, double q, double eps, out string s)
         {
-            ChangeLastColSide(ref matrix);
-
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            if (iMax != jMax - 1)
-            {
-                s = "Not a square matrix";
-                root = null;
-                return false;
-            }
-            root = new double[iMax];
+
+            SeperatingAb(matrix, out double[,] A, out double[] b);
+
+            root = seed;
             double[] root2 = new double[iMax];
-            for (int k = 0; k < iMax; k++)
-            {
-                root2[k] = root[k];
-            }
+            SetSameValue(root2, root);
 
             double minDiag = double.MaxValue;
             for (int n = 0; n < iMax; n++)
@@ -862,35 +828,19 @@ namespace NumericalAnalysis
             double eps0 = eps * minDiag * ((1 - q) / q);
 
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+
+            double[,] Alpha = AddMarixWithnT(MulMatrixWithN(A, -1), 1); // alpha = I-A
             do
             {
-                for (int k = 0; k < iMax; k++)
-                {
-                    root[k] = root2[k];
-                }
+                SetSameValue(root, root2);
                 if (itr > itrMax)
                 {
                     s = "Does not converge";
                     return false;
                 }
-                for (int i = 0; i < iMax; i++)
-                {
-                    double temp = 0;
-                    for (int j = 0; j < jMax; j++)
-                    {
-                        if (j == i) continue;
-                        if (j == jMax - 1)
-                        {
-                            temp -= matrix[i, j];
-                            continue;
-                        }
-                        temp -= matrix[i, j] * root[j];
-                    }
-                    root2[i] = temp;
-                    //Console.WriteLine("temp2: " + root2[i]);
-                    //Console.WriteLine("temp: " + root[i]);
-                    //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
-                }
+                root2 = Add2Vector(MulMatrixWithVector(Alpha, root), b); // x = alpha*x+b
+                itr++;
+                PrintArray(root2, true, "root");
                 itr++;
                 PrintArray(root2, true, "x* root");
                 //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
@@ -905,13 +855,17 @@ namespace NumericalAnalysis
             s = null;
             return true;
         }
-
         public static bool JacobiIterativeRootDistance(double[] root1, double[] root2, double eps0)
         {
             int size = root1.Length;
+            double sum = 0;
             for (int i = 0; i < size; i++)
-                if (Math.Abs(root1[i] - root2[i]) > eps0)
-                    return false;
+            {
+                sum += Math.Abs(root1[i] - root2[i]);
+                
+            }
+            if (sum > eps0)
+                return false;
             return true;
         }
 

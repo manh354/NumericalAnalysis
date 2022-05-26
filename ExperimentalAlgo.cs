@@ -8,7 +8,6 @@ namespace NumericalAnalysis
 {
     public partial class Algorithms
     {
-
-       
+        
     }
 }
