@@ -27,6 +27,9 @@ namespace NumericalAnalysis
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
 
+            double[,] matrix2 = new double[iMax, jMax];
+            SetSameValue(matrix2, matrix);
+
             if (iMax != jMax - 1)
             {
                 Console.WriteLine("Not a square matrix");
@@ -36,24 +39,24 @@ namespace NumericalAnalysis
             }
             for (int n = 0; n < iMax; n++)
             {
-                matrix[n, n] += 1;
+                matrix2[n, n] += 1;
             }
-            if (!MultiSINormCheckEx(matrix, out q))
+            if (!MultiSINormCheckEx(matrix2, out q))
             {
                 for (int n = 0; n < iMax; n++)
                 {
-                    matrix[n, n] -= 2;
+                    matrix2[n, n] -= 2;
                 }
-                if (!MultiSINormCheckEx(matrix, out q))
+                if (!MultiSINormCheckEx(matrix2, out q))
                 {
                     q = -1;
                     mode = -1;
                     return false;
                 }
-                mode = 1;
+                mode = 2;
                 return true;
             }
-            mode = 2;
+            mode = 1;
             return true;
         }
 
@@ -125,7 +128,8 @@ namespace NumericalAnalysis
             if (mode == 2) goto MODE2;
 
             MODE1:
-            double[,] Alpha2 = AddMarixWithnT(A, 1);
+            double[,] Alpha1 = AddMarixWithnT(A, 1);
+            //PrintMatrix(Alpha1);
             do
             {
                 if (itr > itrMax)
@@ -134,18 +138,19 @@ namespace NumericalAnalysis
                     return false;
                 }
                 SetSameValue(root, root2);
-                root2 = Add2Vector(MulMatrixWithVector(Alpha2, root), MulVectorWithN(b, -1));
+                root2 = Add2Vector(MulMatrixWithVector(Alpha1, root), MulVectorWithN(b, -1));
                 itr++;
                 Console.WriteLine("itr:{0}", itr);
-                PrintArray(root, true, "root");
-                PrintArray(root2, true, "root2");
+                //PrintArray(root, true, "root");
+                PrintArray(root2, true, "root");
                 //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
             } while (!JacobiIterativeRootDistance(root, root2, eps));
             goto END;
 
 
             MODE2:
-            double[,] Alpha1 = AddMarixWithnT(MulMatrixWithN(A, -1), 1);
+            double[,] Alpha2 = AddMarixWithnT(MulMatrixWithN(A, -1), 1);
+            //PrintMatrix(Alpha2);
             do
             {
                 if (itr > itrMax)
@@ -153,12 +158,14 @@ namespace NumericalAnalysis
                     s = "Does not converge";
                     return false;
                 }
-                root = root2;
-                root2 = Add2Vector(MulMatrixWithVector(Alpha1, root), b);
+                SetSameValue(root, root2);
+                //PrintArray(MulMatrixWithVector(Alpha2, root));
+                //PrintArray(Add2Vector(MulMatrixWithVector(Alpha2, root), b));
+                root2 = Add2Vector(MulMatrixWithVector(Alpha2, root), b);
                 itr++;
                 Console.WriteLine("itr:{0}", itr);
-                PrintArray(root, true, "root");
-                PrintArray(root2, true, "root2");
+                //PrintArray(root, true, "root");
+                PrintArray(root2, true, "root");
                 //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
             } while (!JacobiIterativeRootDistance(root, root2, eps));
             goto END;

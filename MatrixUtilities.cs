@@ -328,7 +328,7 @@ namespace NumericalAnalysis
             double[] result = new double[xLen];
             for (int i = 0; i < xLen; i++)
                 result[i] = x[i] + y[i];
-            return x;
+            return result;
         }
 
         public static void SetSameValue(double[]x,double[]y)
@@ -338,6 +338,17 @@ namespace NumericalAnalysis
             if (xLen != ylen) return ;
             for (int i = 0; i < xLen; i++)
                 x[i] =y[i];
+        }
+        public static void SetSameValue(double[,] x, double[,] y)
+        {
+            int iMax = x.GetLength(0);
+            int jMax = y.GetLength(1);
+            int iymax = x.GetLength(0);
+            int jymax = y.GetLength(1);
+            if (iMax != iymax) return;
+            for (int i = 0; i < iMax; i++)
+                for (int j = 0; j < jMax; j++)
+                    x[i, j] = y[i, j];
         }
         #endregion
     }
