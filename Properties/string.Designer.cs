@@ -221,7 +221,8 @@ namespace NumericalAnalysis.Properties {
         ///Type 2 to select Gauss Jordan method
         ///Type 3 to select LU decomposition
         ///Type 4 to select Jacobi method
-        ///Type 5 to select Gauss-Seidel method.
+        ///Type 5 to select Gauss-Seidel method
+        ///Type 6 to select simple Iterative..
         /// </summary>
         internal static string TypeInChapter2Switch {
             get {

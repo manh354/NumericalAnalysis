@@ -176,6 +176,7 @@ Type 4 to select Singular Iterative method:</value>
 Type 2 to select Gauss Jordan method
 Type 3 to select LU decomposition
 Type 4 to select Jacobi method
-Type 5 to select Gauss-Seidel method</value>
+Type 5 to select Gauss-Seidel method
+Type 6 to select simple Iterative.</value>
   </data>
 </root>

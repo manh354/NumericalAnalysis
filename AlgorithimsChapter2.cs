@@ -85,10 +85,24 @@ namespace NumericalAnalysis
                     }
                     Algorithms.JacobiIterativeMain(ref matrix5, seed5, 1e-5);
                     break;
+                case "6":
+                    Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
+                    Console.ReadLine();
+                    Console.WriteLine("Processing matrix");
+                    string fileLocation6 = @"MatrixInput.txt";
+                    double[,] matrix6;
+                    if (!InOutProcessing.MatrixInput(out matrix6, out double[] seed6, fileLocation6))
+                    {
+                        Console.WriteLine("Invalid Inputs");
+                        break;
+                    }
+                    Algorithms.SimpleIterativeMain(ref matrix6, seed6, 1e-5);
+                    break;
                 default:
                     break;
             }
         }
+
         #region GaussianElimination
 
         /// <summary>
@@ -455,15 +469,20 @@ namespace NumericalAnalysis
 
 
         #region SimpleIterative
-        /*
-        public bool SimpleIterativeMain(ref double[,] matrix, double eps = 1e-7)
+        
+        static public bool SimpleIterativeMain(ref double[,] matrix, double[] seed, double eps = 1e-7)
         {
             if (!MatrixRefactorAndNormCheck(ref matrix, out double q))
             { Console.WriteLine("Norm does not satisfy condition."); return false; }
-            SimpleIterator(matrix,);
+            if (!SimpleIterator(ref matrix, seed, q, out double[] root, eps, out string s))
+            {
+                Console.WriteLine(s);
+                return false;
+            }
+            return true;
         }
 
-        public bool MatrixRefactorAndNormCheck(ref double[,] matrix, out double q)
+        static public bool MatrixRefactorAndNormCheck(ref double[,] matrix, out double q)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -474,36 +493,26 @@ namespace NumericalAnalysis
                 q = -1;
                 return false;
             }
-            for (int i = 0; i < iMax; i++)
-            {
-                for (int j = 0; j < jMax - 1; j++)
-                {
-                    if (Math.Abs(matrix[i, j]) >= 1)
-                    {
-                        q = -1;
-                        return false;
-                    }
-                }
-            }
             for (int n = 0; n<iMax;n++)
             {
                 matrix[n, n] += 1;
             }    
-            if(!MultiSINormCheck(matrix))
+            if(!MultiSINormCheck(matrix,out q))
             {
                 for (int n = 0; n < iMax; n++)
                 {
                     matrix[n, n] -= 2;
                 }
-                if (!MultiSINormCheck(matrix))
+                if (!MultiSINormCheck(matrix, out q))
                 {
                     q = -1;
                     return false;
                 }    
-            }    
+            }
+            return true;
         }
 
-        public bool MultiSINormCheck(double [,] matrix)
+        static public bool MultiSINormCheck(double [,] matrix, out double q)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -511,20 +520,50 @@ namespace NumericalAnalysis
             if (iMax != jMax - 1)
             {
                 Console.WriteLine("Not a square matrix");
+                q = -1;
                 return false;
             }
+            q = -1;
             
+            // Kiểm tra chuẩn vô cùng 
+            MODE1:
             for (int i = 0; i < iMax; i++)
             {
+                double sum = 0;
                 for (int j = 0; j < jMax - 1; j++)
                 {
-                    if (Math.Abs(matrix[i, j])>=1)
-                        return false;
+                    sum += Math.Abs(matrix[i, j]);
                 }
+                if (sum >= 1)
+                {
+                    q = -1; 
+                    goto MODE2;
+                }
+                if (sum > q)
+                    q = sum;
             }
+
+            // Kiểm tra chuẩn 1
+            MODE2:
+            for (int j = 0; j < jMax-1; j++)
+            {
+                double sum = 0;
+                for (int i = 0; i < iMax; i++)
+                {
+                    sum += Math.Abs(matrix[i, j]);
+                }
+                if (sum >= 1)
+                {
+                    q = -1;
+                    return false;
+                }
+                if (sum > q)
+                    q = sum;
+            }
+            return true;
         }
 
-        public bool SimpleIterator(ref double[,] matrix, double[] seed, out double[] root, double eps, out string s)
+        static public bool SimpleIterator(ref double[,] matrix, double[] seed, double q ,out double[] root, double eps, out string s)
         {
             ChangeLastColSide(ref matrix);
 
@@ -561,20 +600,20 @@ namespace NumericalAnalysis
                         }
                         temp -= matrix[i, j] * root[j];
                     }
-                    root2[i] = temp / matrix[i, i];
+                    root2[i] = temp;
                     //Console.WriteLine("temp2: " + root2[i]);
                     //Console.WriteLine("temp: " + root[i]);
                     //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
                 }
                 itr++;
-                PrintArray(root2, true);
+                Console.WriteLine("itr:{0}", itr);
+                PrintArray(root2, true, "root");
                 //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
             } while (!JacobiIterativeRootDistance(root, root2, eps));
             ChangeLastColSide(ref matrix);
             s = null;
             return true;
         }
-        */
         #endregion
 
         #region JacobiIterative

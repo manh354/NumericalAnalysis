@@ -36,15 +36,14 @@ namespace NumericalAnalysis
 
             foreach (string rowRaw in s)
             {
-                rowRaw.Trim();
+                
+                Console.WriteLine(rowRaw);
                 if (rowRaw.Contains("seed:"))
                 {
-                    rowRaw.Trim();
-                    rowRaw.Remove(0, 4);
-                    sseed = rowRaw.Split(' ');
+                    sseed = rowRaw.Replace("seed:",null).Split(' ');
                     continue;
                 }
-                s_processed.Enqueue(rowRaw.Split(' '));
+                s_processed.Enqueue(rowRaw.Trim().Split(' '));
             }
             jMax = s_processed.Peek().Length;
             //Console.WriteLine("jMax = {0}", jMax);
@@ -70,7 +69,7 @@ namespace NumericalAnalysis
             int l = 0;
             foreach (string elem in sseed)
             {
-                Console.WriteLine("elem: {0}", elem);
+                //Console.WriteLine("elem: {0}", elem);
                 double temp;
                 if (!double.TryParse(elem, out temp))
                 {

@@ -173,6 +173,7 @@ Nhập 4 để chọn phương pháp lặp đơn</value>
 Nhập 2 để chọn phương pháp Gauss Jordan
 Nhập 3 để chọn phương pháp LU
 Nhập 4 để chọn phương pháp Lặp Jacobi
-Nhập 5 để chọn phương pháp Lặp Gauss-Seidel</value>
+Nhập 5 để chọn phương pháp Lặp Gauss-Seidel
+Nhập 6 để chọn phương pháp Lặp Đơn</value>
   </data>
 </root>
