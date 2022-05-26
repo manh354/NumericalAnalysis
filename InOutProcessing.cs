@@ -10,7 +10,7 @@ namespace NumericalAnalysis
 {
     public class InOutProcessing
     {
-        public static bool MatrixInput(out double[,] matrix, string fileLocation =@"MatrixInput.txt" )
+        public static bool MatrixInput(out double[,] matrix, out double[] seed ,string fileLocation =@"MatrixInput.txt" )
         {
             if (!File.Exists(fileLocation))
             {
@@ -24,17 +24,29 @@ namespace NumericalAnalysis
             while ((_s = sr.ReadLine()) != null)
             {
                 s.Enqueue(_s);
+                if (_s.Contains("seed:")) continue;
                 iMax++;
             }
             if(iMax ==0)
             {
                 matrix = null;
+                seed = null;
                 return false;
             }
             //Console.WriteLine("iMax = {0} ",iMax);
             Queue<string[]> s_processed = new Queue<string[]>();
+            string[] sseed = null;
+            seed = new double[iMax];
+
             foreach(string rowRaw in s)
             {
+                if(rowRaw.Contains("seed:"))
+                {
+                    rowRaw.Trim();
+                    rowRaw.Replace("seed:", null);
+                    sseed = rowRaw.Split(' ');
+                    continue;
+                }    
                 s_processed.Enqueue(rowRaw.Split(' '));
             }
             jMax = s_processed.Peek().Length;
@@ -50,12 +62,28 @@ namespace NumericalAnalysis
                     if (!double.TryParse(elem, out temp))
                     {
                         matrix = null;
+                        seed = null;
                         return false;
                     }
                     matrix[i, j] = temp;
                     j++;
                 }
                 i++;
+            }
+            int l = 0;
+            foreach (string elem in sseed)
+            {
+                double temp;
+                if(!double.TryParse(elem,out temp))
+                {
+                    seed = null;
+                    break;
+                }
+                else
+                {
+                    seed[l] = temp;
+                    l++;
+                }
             }
             return true;
         }

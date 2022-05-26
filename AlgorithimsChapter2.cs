@@ -23,14 +23,14 @@ namespace NumericalAnalysis
                     Console.WriteLine("Processing matrix");
                     string fileLocation = @"MatrixInput.txt";
                     double[,] matrix;
-                    if (!InOutProcessing.MatrixInput(out matrix, fileLocation))
+                    if (!InOutProcessing.MatrixInput(out matrix,out double[] seed1 ,fileLocation))
                     {
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    MatrixDecomposition.PrintMatrix(matrix);
+                    Algorithms.PrintMatrix(matrix);
                     Dictionary<int, Dictionary<int, double>> roots;
-                    MatrixDecomposition.GaussMain(ref matrix, out roots);
+                    Algorithms.GaussMain(ref matrix, out roots);
                     InOutProcessing.MatrixRootOutput(roots, matrix.GetLength(1) - 1);
                     break;
                 case "2":
@@ -39,14 +39,14 @@ namespace NumericalAnalysis
                     Console.WriteLine("Processing matrix");
                     string fileLocation2 = @"MatrixInput.txt";
                     double[,] matrix2;
-                    if (!InOutProcessing.MatrixInput(out matrix2, fileLocation2))
+                    if (!InOutProcessing.MatrixInput(out matrix2, out double[] seed2, fileLocation2))
                     {
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    MatrixDecomposition.PrintMatrix(matrix2);
+                    Algorithms.PrintMatrix(matrix2);
                     Dictionary<int, Dictionary<int, double>> roots2;
-                    MatrixDecomposition.GaussJordanMain(ref matrix2, out roots2);
+                    Algorithms.GaussJordanMain(ref matrix2, out roots2);
                     InOutProcessing.MatrixRootOutput(roots2, matrix2.GetLength(1) - 1);
                     break;
                 case "3":
@@ -55,12 +55,12 @@ namespace NumericalAnalysis
                     Console.WriteLine("Processing matrix");
                     string fileLocation3 = @"MatrixInput.txt";
                     double[,] matrix3;
-                    if (!InOutProcessing.MatrixInput(out matrix3, fileLocation3))
+                    if (!InOutProcessing.MatrixInput(out matrix3, out double[] seed3, fileLocation3))
                     {
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    MatrixDecomposition.LUmain(ref matrix3);
+                    Algorithms.LUmain(ref matrix3);
                     break;
                 case "4":
                     Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
@@ -68,12 +68,12 @@ namespace NumericalAnalysis
                     Console.WriteLine("Processing matrix");
                     string fileLocation4 = @"MatrixInput.txt";
                     double[,] matrix4;
-                    if (!InOutProcessing.MatrixInput(out matrix4, fileLocation4))
+                    if (!InOutProcessing.MatrixInput(out matrix4, out double[] seed4, fileLocation4))
                     {
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    MatrixDecomposition.JacobiIterativeMain(ref matrix4, 0.000000000001);
+                    Algorithms.JacobiIterativeMain(ref matrix4, seed4 ,0.000000000001);
                     break;
                 case "5":
                     Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
@@ -81,12 +81,12 @@ namespace NumericalAnalysis
                     Console.WriteLine("Processing matrix");
                     string fileLocation5 = @"MatrixInput.txt";
                     double[,] matrix5;
-                    if (!InOutProcessing.MatrixInput(out matrix5, fileLocation5))
+                    if (!InOutProcessing.MatrixInput(out matrix5, out double[] seed5, fileLocation5))
                     {
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    MatrixDecomposition.JacobiIterativeMain(ref matrix5, 0.000000000001);
+                    Algorithms.JacobiIterativeMain(ref matrix5,seed5 ,0.000000000001);
                     break;
                 default:
                     break;
@@ -163,7 +163,7 @@ namespace NumericalAnalysis
                             updateFirstPosDiff = j + 1;
                         }
                     }
-                    PrintMatrix(matrix, true);
+                    PrintMatrix( matrix, true);
                     firstPosDif0[di] = updateFirstPosDiff;
                     PrintArray(firstPosDif0);
                 }
@@ -216,7 +216,6 @@ namespace NumericalAnalysis
                 {
                     processedMatrix[i, j] = processedMatrix[i, j] / processedMatrix[i, firstPosDif0[i]];
                 }
-                PrintMatrix(processedMatrix,true);
                 for (int j = lastPosDif0[i]; j > firstPosDif0[i]; j--)
                 {
                     if (roots.ContainsKey(j))
@@ -298,6 +297,10 @@ namespace NumericalAnalysis
                     for (int j = 0; j < jMax - 1; j++) // Minus 1 to not include matrix b in choosing pivot points
                     {
                         if (chosenCols[j]) continue;
+                        if(Math.Abs(matrix[i,j])==1)
+                        {
+                            maxOfMatrix = matrix[i, j];
+                        }    
                         if (maxOfMatrix < Math.Abs(matrix[i, j]))
                         {
                             maxOfMatrix = matrix[i, j];
@@ -319,7 +322,7 @@ namespace NumericalAnalysis
                         if (Math.Abs(matrix[i, j]) < eps) matrix[i, j] = 0; // Rounding matrix at position to ensure no errors.
                     }
                 }
-                PrintMatrix(matrix, true);
+                PrintMatrix( matrix, true);
             }
             SwapColGaussJordan(chosenCols, ref matrix, out changedPos);
             UpperTrapezoidSortSwap(null, ref matrix, out _firstPosDif0);
@@ -423,7 +426,7 @@ namespace NumericalAnalysis
                     for (int j = k + 1; j < n; j++)
                         matrix[i, j] = matrix[i, j] - L[i, k] * U[k, j];
             }
-            PrintMatrix(matrix); PrintMatrix(U); PrintMatrix(L);
+            PrintMatrix( matrix,false); PrintMatrix( U,false); PrintMatrix( L, false);
             return true;
         }
 
@@ -453,57 +456,84 @@ namespace NumericalAnalysis
 
         #endregion
 
+        /*
         #region SimpleIterative
 
-        public void SimpleIterativeMain()
+        public bool SimpleIterativeMain(ref double[,] matrix, double eps = 1e-7)
         {
-            MatrixNormCheck();
+            if (!MatrixRefactorAndNormCheck(ref matrix, out double q))
+            { Console.WriteLine("Norm does not satisfy condition."); return false; }
+            SimpleIterator(matrix,);
         }
 
-        public void MatrixNormCheck()
+        public bool MatrixRefactorAndNormCheck(ref double[,] matrix, out double q)
         {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
 
-        }
-
-        public void SimpleIterator()
-        {
-
-        }
-
-        #endregion
-
-        #region JacobiIterative
-
-        //Require B matrix's norm < q < 1 ; x = Bx + b
-
-        public static void JacobiIterativeMain(ref double[,] matrix, double eps = 1e-7)
-        {
-            double[] seed = new double[matrix.GetLength(0)];
-            for (int n = 0; n < seed.Length; n++)
+            if (iMax != jMax - 1)
             {
-                seed[n] = 0;
+                Console.WriteLine("Not a square matrix");
+                q = -1;
+                return false;
             }
-            string s;
-            if (!JacobiIterativeMethod(ref matrix, seed, out double[] root, eps, out s))
+            for (int i = 0; i < iMax; i++)
             {
-                Console.WriteLine(s);
-                return;
+                for (int j = 0; j < jMax - 1; j++)
+                {
+                    if (Math.Abs(matrix[i, j]) >= 1)
+                    {
+                        q = -1;
+                        return false;
+                    }
+                }
             }
-            PrintArray(root, true, "root");
+            for (int n = 0; n<iMax;n++)
+            {
+                matrix[n, n] += 1;
+            }    
+            if(!MultiSINormCheck(matrix))
+            {
+                for (int n = 0; n < iMax; n++)
+                {
+                    matrix[n, n] -= 2;
+                }
+                if (!MultiSINormCheck(matrix))
+                {
+                    q = -1;
+                    return false;
+                }    
+            }    
         }
 
-        public static bool JacobiIterativeMethod(ref double[,] matrix, double[] seed, out double[] root, double eps, out string s)
+        public bool MultiSINormCheck(double [,] matrix)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            if (iMax != jMax - 1)
+            {
+                Console.WriteLine("Not a square matrix");
+                return false;
+            }
+            
+            for (int i = 0; i < iMax; i++)
+            {
+                for (int j = 0; j < jMax - 1; j++)
+                {
+                    if (Math.Abs(matrix[i, j])>=1)
+                        return false;
+                }
+            }
+        }
+
+        public bool SimpleIterator(ref double[,] matrix, double[] seed, out double[] root, double eps, out string s)
         {
             ChangeLastColSide(ref matrix);
 
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            if (iMax != jMax - 1)
-            {
-                s = "Not a square matrix";
-                root = null;
-                return false;
-            }
+            
             root = new double[iMax];
             double[] root2 = new double[iMax];
             for (int k = 0; k < iMax; k++)
@@ -527,7 +557,6 @@ namespace NumericalAnalysis
                     double temp = 0;
                     for (int j = 0; j < jMax; j++)
                     {
-                        if (i == j) continue;
                         if (j == jMax - 1)
                         {
                             temp -= matrix[i, j];
@@ -549,11 +578,287 @@ namespace NumericalAnalysis
             return true;
         }
 
-        public static bool JacobiIterativeRootDistance(double[] root1, double[] root2, double eps)
+        #endregion
+        */
+        #region JacobiIterative
+
+        //Require B matrix's norm < q < 1 ; x = Bx + b
+
+        public static void JacobiIterativeMain(ref double[,] matrix, double[] seed,double eps = 1e-7)
+        {
+            double q;
+            int n = JacobiMatrixNormCheck(matrix, out q);
+            if (n == 0)
+            {
+                Console.WriteLine("Norm check failed");
+                return;
+            }
+            for (int m = 0; m < seed.Length; m++)
+            {
+                seed[m] = 0;
+            }
+            
+            double[] root = null;
+            if (n == 1)
+            {
+                JacobiNormalizeByRow(ref matrix);
+                string s;
+                if (!JacobiIterativeRow(ref matrix, seed, out root, q,eps, out s))
+                {
+                    Console.WriteLine(s);
+                    return;
+                }
+            }
+            if(n==2)
+            {
+                JacobiNormalizeByCol(ref matrix, out double[] diag);
+                string s;
+                if(!JacobiIterativeCol(ref matrix, seed, diag,out root,q, eps, out s))
+                {
+                    Console.WriteLine(s);
+                    return;
+                }    
+            }    
+            PrintArray(root, true, "root");
+        }
+
+        public static void JacobiNormalizeByRow(ref double[,] matrix)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            for (int i = 0;i<iMax;i++)
+            {
+                for (int j = 0; j < jMax; j++)
+                {
+                    matrix[i, j] /= matrix[i, i];
+                } 
+            }    
+
+        }
+
+        public static void JacobiNormalizeByCol(ref double[,] matrix ,out double[] diag)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            diag = new double[iMax];
+
+            for (int j = 0; j < jMax-1; j++)
+            {
+                diag[j] = matrix[j, j];
+                for (int i = 0; i < iMax; i++)
+                {
+                    matrix[i, j] /= matrix[j, j];
+                }
+            }
+
+        }
+
+        public static int JacobiMatrixNormCheck(double[,] matrix ,out double q)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            double summax = 0;
+
+
+            // Kiểm tra Ma trận chéo chội hàng // Check if is diagonally dominant by row
+            for (int i = 0;i<iMax;i++)
+            {
+                double sum = 0;
+                for(int j = 0; j<jMax -1;j++)
+                {
+                    sum += Math.Abs(matrix[i, j]);
+                }
+                sum -= Math.Abs(matrix[i, i]);
+                if (sum >= Math.Abs(matrix[i, i]))
+                {
+                    goto MODE2;
+                }
+                if(summax < sum)
+                {
+                    summax = sum;
+                }    
+            }
+            q = summax;
+            return 1;
+
+            // Kiểm tra Ma trận chéo chội cột // Check if is diagonally dominant by column
+            MODE2:
+
+            summax = 0;
+
+            for(int j = 0;j<jMax-1;j++)
+            {
+                double sum = 0;
+                for(int i = 0;i<iMax;i++)
+                {
+                    sum += Math.Abs(matrix[i, j]);
+                }
+                sum -= Math.Abs(matrix[j, j]);
+                if(sum>Math.Abs(matrix[j,j]))
+                {
+                    goto MODE0;
+                }    
+                if(sum > summax)
+                {
+                    summax = sum;
+                }    
+            }
+            q = summax;
+            return 2;
+
+
+            // Không là ma trận chéo chội // Is not a diagonally dominant matrix
+            MODE0:
+            q = -1;
+            return 0;
+
+        }
+
+        // Ma trận chéo chội hàng
+        public static bool JacobiIterativeRow(ref double[,] matrix, double[] seed, out double[] root, double q , double eps, out string s)
+        {
+            ChangeLastColSide(ref matrix);
+
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            if (iMax != jMax - 1)
+            {
+                s = "Not a square matrix";
+                root = null;
+                return false;
+            }
+            root = new double[iMax];
+            double[] root2 = new double[iMax];
+            for (int k = 0; k < iMax; k++)
+            {
+                root2[k] = root[k];
+            }
+
+            double eps0 = eps * ((1 - q)/q);
+
+            int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+            do
+            {
+                for (int k = 0; k < iMax; k++)
+                {
+                    root[k] = root2[k];
+                }
+                if (itr > itrMax)
+                {
+                    s = "Does not converge";
+                    return false;
+                }
+                for (int i = 0; i < iMax; i++)
+                {
+                    double temp = 0;
+                    for (int j = 0; j < jMax; j++)
+                    {
+                        if (j == 1) continue;
+                        if (j == jMax - 1)
+                        {
+                            temp -= matrix[i, j];
+                            continue;
+                        }
+                        temp -= matrix[i, j] * root[j];
+                    }
+                    root2[i] = temp / matrix[i, i];
+                    //Console.WriteLine("temp2: " + root2[i]);
+                    //Console.WriteLine("temp: " + root[i]);
+                    //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
+                }
+                itr++;
+                PrintArray(root2, true);
+                //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
+            } while (!JacobiIterativeRootDistance(root, root2, eps));
+            ChangeLastColSide(ref matrix);
+            s = null;
+            return true;
+        }
+
+        // Ma trận chéo chội cột
+        public static bool JacobiIterativeCol(ref double[,] matrix, double[] seed, double[] diag, out double[] root, double q, double eps, out string s)
+        {
+            ChangeLastColSide(ref matrix);
+
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            if (iMax != jMax - 1)
+            {
+                s = "Not a square matrix";
+                root = null;
+                return false;
+            }
+            root = new double[iMax];
+            double[] root2 = new double[iMax];
+            for (int k = 0; k < iMax; k++)
+            {
+                root2[k] = root[k];
+            }
+
+            double minDiag = double.MaxValue;
+            for(int n = 0;n<iMax;n++)
+            {
+                double absDiag = Math.Abs(diag[n]);
+                if (absDiag < minDiag)
+                {
+                    minDiag = absDiag;
+                }    
+            }    
+            double eps0 = eps * minDiag* ( (1 - q)/q);
+
+            int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
+            do
+            {
+                for (int k = 0; k < iMax; k++)
+                {
+                    root[k] = root2[k];
+                }
+                if (itr > itrMax)
+                {
+                    s = "Does not converge";
+                    return false;
+                }
+                for (int i = 0; i < iMax; i++)
+                {
+                    double temp = 0;
+                    for (int j = 0; j < jMax; j++)
+                    {
+                        if (j == 1) continue;
+                        if (j == jMax - 1)
+                        {
+                            temp -= matrix[i, j];
+                            continue;
+                        }
+                        temp -= matrix[i, j] * root[j];
+                    }
+                    root2[i] = temp / matrix[i, i];
+                    //Console.WriteLine("temp2: " + root2[i]);
+                    //Console.WriteLine("temp: " + root[i]);
+                    //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
+                }
+                itr++;
+                PrintArray(root2, true);
+                //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
+            } while (!JacobiIterativeRootDistance(root, root2, eps));
+
+            for(int k = 0; k < iMax;k++)
+            {
+                root[k] /= diag[k];
+            }    
+
+            ChangeLastColSide(ref matrix);
+            s = null;
+            return true;
+        }
+
+        public static bool JacobiIterativeRootDistance(double[] root1, double[] root2, double eps0)
         {
             int size = root1.Length;
             for (int i = 0; i < size; i++)
-                if (Math.Abs(root1[i] - root2[i]) > eps)
+                if (Math.Abs(root1[i] - root2[i]) > eps0)
                     return false;
             return true;
         }
@@ -744,20 +1049,7 @@ namespace NumericalAnalysis
             b = temp;
         }
 
-        public static void PrintMatrix<T>(T[,] matrix)
-        {
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
-            for (int i = 0; i < iMax; i++)
-            {
-                for (int j = 0; j < jMax; j++)
-                    Console.Write(matrix[i, j].ToString() + " ");
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-        }
-
-        public static void PrintMatrix(double[,] matrix, bool flippedLastCol)
+        public static void PrintMatrix(double[,] matrix, bool flippedLastCol = false)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -767,9 +1059,9 @@ namespace NumericalAnalysis
                 {
                     if(flippedLastCol&&j==jMax-1)
                     {
-                        Console.Write((-matrix[i, j]).ToString() + " ");
+                            Console.Write((-matrix[i, j]) + " ");
                     }    
-                    else Console.Write(matrix[i, j].ToString() + " ");
+                    else Console.Write(matrix[i, j] + " ");
                 }
                 Console.WriteLine();
             }

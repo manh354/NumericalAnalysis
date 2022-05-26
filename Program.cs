@@ -25,11 +25,13 @@ namespace NumericalAnalysis
                     case "2":
                         Algorithms.Chapter2Main();
                         break;
-                    default:
+                    case"break":
                         goto BREAK;
+                        break;
                 }
-                BREAK: break;
             }
+
+            BREAK: return;
         }
     }
 }
