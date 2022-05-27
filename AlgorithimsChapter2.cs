@@ -330,7 +330,7 @@ namespace NumericalAnalysis
                         }
                         if (maxOfMatrix < Math.Abs(matrix[i, j]))
                         {
-                            maxOfMatrix = matrix[i, j];
+                            maxOfMatrix = Math.Abs(matrix[i, j]);
                             row = i;
                             col = j;
                         }
@@ -481,6 +481,15 @@ namespace NumericalAnalysis
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
+
+            for (int n = 0; n < iMax; n++)
+            {
+                if(matrix[n,n]<0)
+                {
+                    for (int m = 0; m < jMax; m++)
+                        matrix[n, m] *= -1;
+                }    
+            }
 
             double[,] matrix2 = new double[iMax, jMax];
             SetSameValue(matrix2, matrix);
