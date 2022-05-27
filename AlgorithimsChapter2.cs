@@ -801,6 +801,7 @@ namespace NumericalAnalysis
                 }
                 root2 = Add2Vector(MulMatrixWithVector(Alpha, root), b); // x = alpha*x+b
                 itr++;
+                Console.WriteLine("itr: {0}", itr);
                 PrintArray(root2, true, "root");
                 //Console.WriteLine(JacobiIterativeRootDistance(root, root2, eps));
             } while (!JacobiIterativeRootDistance(root, root2, eps0));

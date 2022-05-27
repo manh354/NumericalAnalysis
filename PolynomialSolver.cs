@@ -30,7 +30,7 @@ namespace NumericalAnalysis
                 return true;
             }
             //Main recursive loop
-            if (PolySolverRecursive(PolyDerivative(coef), eps/5 ,out roots))
+            if (PolySolverRecursive(PolyDerivative(coef), eps,out roots))
             {
                 BisectionRootsFinder(coef, roots, eps, out roots);
                 return true;
@@ -80,16 +80,17 @@ namespace NumericalAnalysis
         public static bool BisectionRootFinder(double[] coef, double a, double b, double eps, out double root)
         {
             int maxItr = (int)Math.Log2(1 / eps) * 500;
+            if (Math.Abs(PolyValueCalc(coef, a)) < eps)
+            {
+                root = a;
+                return true;
+            }
             if (PolyValueCalc(coef, a) * PolyValueCalc(coef, b) > 0)
             {
                 root = double.NaN;
                 return false;
             };
-            if(Math.Abs(PolyValueCalc(coef,a)) < eps )
-            {
-                root = a;
-                return true;
-            }    
+            
             int sign = Math.Sign(PolyValueCalc(coef, a));
             int itr = 0;
             double c, z;
@@ -112,7 +113,6 @@ namespace NumericalAnalysis
                 }
             } while (Math.Abs(b - a) >= eps);
             root = c;
-            Console.WriteLine(c);
             return true;
         }
 
