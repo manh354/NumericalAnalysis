@@ -256,5 +256,19 @@ namespace NumericalAnalysis
                 return false;
             return true;
         }
+
+        public void MatrixOutput(double[] roots, string outputLoc =  "MatrixOutput.txt")
+        {
+            StreamWriter sw = new StreamWriter(outputLoc);
+            foreach(double root in roots)
+            {
+                sw.Write(root.ToString() + " ");
+            }    
+        }
+
+        public void ReplaceMatrix(double[,] A, double[] roots)
+        {
+
+        }
     }
 }

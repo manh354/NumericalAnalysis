@@ -54,7 +54,12 @@ namespace NumericalAnalysis
         {
             roots = new Dictionary<int, double>();
             int num = extremums.Count + 1; //Number of iterations.
-            double root_radius = 1 + Math.Abs(coef.Max()) / coef[coef.Length - 1];
+            double[] absCoef=  new double[coef.Length];
+            for(int ind = 0; ind < coef.Length;ind++)
+            {
+                absCoef[ind] = Math.Abs(coef[ind]);
+            }    
+            double root_radius = 1 + absCoef.Max() / coef[coef.Length - 1];
             int index = 0;
             for (int i = 0; i < num; i++)
             {
