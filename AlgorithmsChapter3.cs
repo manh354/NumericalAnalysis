@@ -8,7 +8,7 @@ namespace NumericalAnalysis
     public partial class Algorithms
     {
 
-        public static void Chapter2Main()
+        public static void Chapter3Main()
         {
             Console.Write(Properties._string.TypeInChapter2Switch);
             string i = Console.ReadLine();

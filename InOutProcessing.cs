@@ -84,6 +84,8 @@ namespace NumericalAnalysis
             }
             return true;
         }
+
+
         public static void MatrixRootOutput(Dictionary<int, Dictionary<int, double>> roots, int maxRoot)
         {
             foreach (KeyValuePair<int, Dictionary<int, double>> root in roots)
@@ -91,7 +93,7 @@ namespace NumericalAnalysis
                 Console.Write("x{0} = ", root.Key + 1);
                 foreach (KeyValuePair<int, double> variable in root.Value)
                 {
-                    if (variable.Value == 0) continue;
+                    //if (variable.Value == 0) continue;
                     if (variable.Key == maxRoot)
                         Console.Write(" {0} ", variable.Value);
                     else

@@ -15,17 +15,17 @@ namespace NumericalAnalysis
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("vi-VN");
             while (true)
             {
-                Console.WriteLine("Nhập 1 để chọn chương 1, nhập 2 để chọn chương 2");
+                Console.WriteLine("Nhập 2 để chọn chương 2, nhập 3 để chọn chương 3, nhập 4 để chọn chương 4");
                 switch (Console.ReadLine())
                 {
-                    case "1":
-                        Algorithms.Chapter1Main();
-                        break;
                     case "2":
                         Algorithms.Chapter2Main();
                         break;
                     case "3":
-                        LowPrecision.BT4();
+                        Algorithms.Chapter3Main();
+                        break;
+                    case "4":
+                        Algorithms.Chapter4Main();
                         break;
                     case "break":
                         goto BREAK;

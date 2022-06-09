@@ -17,7 +17,7 @@ namespace NumericalAnalysis
         }
 
 
-        public static void Chapter1Main()
+        public static void Chapter2Main()
         {
             double? a, b, eps;
             NAFunc _f, _df, _ddf;

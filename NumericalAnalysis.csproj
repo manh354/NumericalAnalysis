@@ -37,6 +37,9 @@
     <None Update="FunctionInput.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="MatrixInputInverse.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MatrixInput.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
