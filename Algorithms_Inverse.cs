@@ -30,6 +30,12 @@ namespace NumericalAnalysis
                     break;
             }
         }
+
+        //////////////////////////////
+        //////////////////////////////
+        //  INVERSE GAUSS JORDAN    //
+        //////////////////////////////
+        //..........................//
         public static bool InverseGaussJordanMain(double[,] matrix, out double[,] inversedMatrix, double eps = 1e-6)
         {
             if (!InverseGaussJordan(matrix, out inversedMatrix, out var er,eps))
@@ -66,6 +72,7 @@ namespace NumericalAnalysis
                 agumentedMatrix[i, i + jMax] = 1;
             }
 
+            Console.WriteLine("Agumented matrix:");
             PrintMatrix(agumentedMatrix);
 
             int[] firstPosDif0 =null;
@@ -129,6 +136,11 @@ namespace NumericalAnalysis
                     inversedMatrix[i, j-jMax] = agumentedMatrix[i, j];
             //PrintMatrix(matrix);
             return true;
+        }
+
+        public static bool InverseNewton(double[,] matrix, out double[,] invertedMatrix, out string er, double eps = 1e-6)
+        {
+
         }
     }
 }

@@ -145,7 +145,7 @@ namespace NumericalAnalysis
         }
 
 
-        public static bool MatrixMultiplier(double[,] leftMatrix, double[,] rightMatrix, out double[,] result)
+        public static bool Mul2Matrix(double[,] leftMatrix, double[,] rightMatrix, out double[,] result)
         {
             int lNumRow = leftMatrix.GetLength(0);
             int lNumCol = leftMatrix.GetLength(1);
@@ -169,7 +169,7 @@ namespace NumericalAnalysis
             return true;
         }
 
-        public static double[,] MatrixMultiplier(double[,] leftMatrix, double[,] rightMatrix)
+        public static double[,] Mul2Matrix(double[,] leftMatrix, double[,] rightMatrix)
         {
             int lNumRow = leftMatrix.GetLength(0);
             int lNumCol = leftMatrix.GetLength(1);
@@ -349,6 +349,21 @@ namespace NumericalAnalysis
             for (int i = 0; i < iMax; i++)
                 for (int j = 0; j < jMax; j++)
                     x[i, j] = y[i, j];
+        }
+
+        public static bool TransposeMatrix(double[,] matrix, out double[,] transposedMatrix)
+        {
+            transposedMatrix = null;
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            if (iMax != jMax)
+                return false;
+
+            for (int i = 0; i < iMax; i++)
+                for (int j = 0; j < jMax; j++)
+                    transposedMatrix[j, i] = matrix[i, j];
+            return true;
         }
         #endregion
     }

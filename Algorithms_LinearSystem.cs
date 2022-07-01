@@ -27,8 +27,10 @@ namespace NumericalAnalysis
                     }
                     Algorithms.PrintMatrix(matrix);
                     Dictionary<int, Dictionary<int, double>> roots;
-                    Algorithms.GaussMain(ref matrix, out roots);
-                    InOutProcessing.MatrixRootOutput(roots, matrix.GetLength(1) - 1);
+                    if(Algorithms.GaussMain(ref matrix, out roots))
+                        InOutProcessing.MatrixRootOutput(roots, matrix.GetLength(1) - 1);
+                    else
+                        Console.WriteLine("Failed Gauss");
                     break;
                 case "2":
                     Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
@@ -43,8 +45,12 @@ namespace NumericalAnalysis
                     }
                     Algorithms.PrintMatrix(matrix2);
                     Dictionary<int, Dictionary<int, double>> roots2;
-                    Algorithms.GaussJordanMain(ref matrix2, out roots2);
-                    InOutProcessing.MatrixRootOutput(roots2, matrix2.GetLength(1) - 1);
+                    if(Algorithms.GaussJordanMain(ref matrix2, out roots2))
+                        InOutProcessing.MatrixRootOutput(roots2, matrix2.GetLength(1) - 1);
+                    else
+                    {
+                        Console.WriteLine("Failed Gauss Jordan");
+                    }
                     break;
                 case "3":
                     Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
@@ -281,8 +287,9 @@ namespace NumericalAnalysis
         {
             int[] firstPosDif0;
             PrioritizedSubtraction(ref matrix, out firstPosDif0, out int[] changedPos);
-            GaussJordanAddingRoots(ref matrix, firstPosDif0, changedPos, out roots);
-            return true;
+            if(GaussJordanAddingRoots(ref matrix, firstPosDif0, changedPos, out roots));
+                return true;
+            return false;
         }
 
         /// <summary>
@@ -418,14 +425,19 @@ namespace NumericalAnalysis
 
         #endregion
 
-        #region LU decomposition
+        #region LU decomposition and solver
 
         public static bool LUmain(ref double[,] matrix)
         {
             int n = matrix.GetLength(0);
 
+            SeperatingAb(matrix, out double[,] A, out double[] b);
+
             double[,] U, L;
             LUdecomposition(ref matrix, out U, out L);
+            LUSolveForY(L, b, out double[] y);
+            LUSolveForX(U, y, out double[] x);
+            PrintArray(x);
             return false;
         }
 
@@ -439,28 +451,130 @@ namespace NumericalAnalysis
             {
                 return false;
             }
-            for (int k = 0; k < n; k++)
+            for (int i = 0; i < n; i++)
             {
-                U[k, k] = matrix[k, k];
-                L[k, k] = 1;
-                for (int i = k + 1; i < n; i++)
+                // Upper Triangular
+                for (int k = i; k < n; k++)
                 {
-                    L[i, k] = matrix[i, k] / U[k, k];
-                    U[k, i] = matrix[k, i];
-                    U[i, k] = 0;
-                    L[k, i] = 0;
+                    // Summation of L(i, j) * U(j, k)
+                    double sum = 0;
+                    for (int j = 0; j < i; j++)
+                        sum += (L[i, j] * U[j, k]);
+
+                    // Evaluating U(i, k)
+                    U[i, k] = matrix[i, k] - sum;
                 }
-                for (int i = k + 1; i < n; i++)
-                    for (int j = k + 1; j < n; j++)
-                        matrix[i, j] = matrix[i, j] - L[i, k] * U[k, j];
+
+                // Lower Triangular
+                for (int k = i; k < n; k++)
+                {
+                    if (i == k)
+                        L[i, i] = 1; // Diagonal as 1
+                    else
+                    {
+                        // Summation of L(k, j) * U(j, i)
+                        double sum = 0;
+                        for (int j = 0; j < i; j++)
+                            sum += (L[k, j] * U[j, i]);
+
+                        // Evaluating L(k, i)
+                        L[k, i]
+                            = (matrix[k, i] - sum) / U[i, i];
+                    }
+                }
             }
             PrintMatrix(matrix, false); PrintMatrix(U, false); PrintMatrix(L, false);
             return true;
         }
 
+        // Ax = b  =>  LUx = b => Ly = b  => Ux = y
+        //  1                   u   u   u   u
+        //  l   1                   u   u   u   
+        //  l   l   1                   u   u
+        //  l   l   l   1                   u
+
+        public static void LUSolveForY(double[,] L, double[] b, out double[] y)
+        {
+            int iMax = L.GetLength(0);
+            int jMax = L.GetLength(1);
+
+            y = new double[iMax];
+
+            for (int i = 0; i < iMax; i++)
+            {
+                double yTemp = b[i];
+                for (int j = 0; j < i; j++)
+                {
+                    yTemp -= L[i, j] * y[j];
+                }
+                y[i] = yTemp;
+            }
+        }
+
+        public static void LUSolveForX(double[,] U, double[] y, out double[] x)
+        {
+            int iMax = U.GetLength(0);
+            int jMax = U.GetLength(1);
+
+            x = new double[iMax];
+            for (int i = iMax - 1; i > 0; i--)
+            {
+                double xTemp = y[i];
+                for (int j = iMax-1; j > i; j--)
+                {
+                    xTemp -= U[i, j] * x[j];
+                }
+                x[i] = xTemp;
+            }
+        }
 
         #endregion
 
+        #region Choleski
+
+        /*public static bool CholeskiDecomposition(double[,] matrix, double eps = 1e-7, out double[,] lower)
+        {
+            lower = null;
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            if (!SeperatingAb(matrix, out double[,] A, out double[] b))
+                return false;
+            if (!IsSquareMartrixHermitian(A))
+            {
+                Console.WriteLine("Matrix is not Hermitian");
+                return false;
+            }
+            lower = new double[iMax, iMax];
+            for (int i = 0; i < iMax; i++)
+                for (int j = i; j < iMax; j++)
+                {
+                    double Sum = 0;
+                    for (int k = 0; k < j; k++)
+                    {
+                        Sum += lower[j, k] * lower[j, k];
+                    }
+                    if (i == j)
+                        lower[j, i] = Math.Sqrt(matrix[i, i] - Sum);
+                    else
+                        lower[j, i] = (matrix[j, i] - Sum) / lower[j, i];
+                }
+                        
+
+
+        }*/
+
+        public static bool IsSquareMartrixHermitian(double[,] matrix)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            for (int i = 0; i < iMax; i++)
+                for (int j = i; j < jMax; j++)
+                    if (matrix[i, j] != matrix[iMax - i - 1, jMax - j - 1])
+                        return false;
+            return true;
+        }
+
+        #endregion
 
         #region SimpleIterative
 

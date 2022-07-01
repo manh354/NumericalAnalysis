@@ -7,7 +7,7 @@ namespace NumericalAnalysis
     {
 
         //Polynomial solver
-        public static void BT4()
+        public static void PrintRoots()
         {
             double? eps;
             InOutProcessing.PolyInput(out List<double> coefs, out eps);
@@ -27,5 +27,6 @@ namespace NumericalAnalysis
             }
             return;
         }
+        
     }
 }
