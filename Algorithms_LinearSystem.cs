@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-//Define matrix: A[i,j] is element at row i column j
+//Define A: A[j,i] is element at row j column i
 
 namespace NumericalAnalysis
 {
@@ -89,7 +89,7 @@ namespace NumericalAnalysis
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
-                    Algorithms.JacobiIterativeMain(ref matrix5, seed5, 1e-5);
+                    Algorithms.GaussSeidelIterativeMain(ref matrix5, seed5, 1e-5);
                     break;
                 case "6":
                     Console.WriteLine("Matrix file location: \"Input.txt\", press any key to continue.");
@@ -115,6 +115,7 @@ namespace NumericalAnalysis
                         Console.WriteLine("Invalid Inputs");
                         break;
                     }
+                    Algorithms.CholeskiMain(matrix7);
                     //
                     break;
                 default:
@@ -125,7 +126,7 @@ namespace NumericalAnalysis
         #region GaussianElimination
 
         /// <summary>
-        /// 
+        /// Ta có AX = B, thấy dấu bằng ở bên trái so với toàn bộ hệ số A, nên ta đổi ma trận B sang trái để tiện tính toán.
         /// </summary>
         /// <param name="matrix"></param>
         public static void ChangeLastColSide(ref double[,] matrix)
@@ -153,7 +154,7 @@ namespace NumericalAnalysis
         }
 
         /// <summary>
-        /// Subtract matrix from front to back.
+        /// Subtract A from front to back.
         /// </summary>
         /// <param name="matrix"></param>
         /// <param name="_firstPosDif0"></param>
@@ -167,15 +168,22 @@ namespace NumericalAnalysis
 
             ChangeLastColSide(ref matrix);
 
-            //Rearrange matrix to a more reversed trapzoid form
+            //Rearrange A to a more reversed trapzoid form, return an array of first position in matrix that is diff from 0.
             UpperTrapezoidSortSwap(null, ref matrix, out int[] firstPosDif0);
-            //Main matrix elimination loop
+            //Main A elimination loop
+            // Xét các hàng i từ trên xuống
             for (int i = 0; i < iMax; i++)
             {
+                int firstPosDif0_OfRow_i = firstPosDif0[i];
+                if (firstPosDif0_OfRow_i == jMax)
+                    continue;
+                UpperTrapezoidSortSwap(firstPosDif0, ref matrix, out firstPosDif0);
+                // Với mỗi hàng i, ta xét các hàng di (khử tất cả các hệ số ở hàng phía dưới hàng i)
                 for (int di = i + 1; di < iMax; di++)
                 {
+                    // đi tìm hệ số khử của từng hàng
                     double mulCoef = matrix[di, firstPosDif0[i]] / matrix[i, firstPosDif0[i]];
-                    //Console.WriteLine("frac: " + matrix[di, firstPosDif0[i]]+"\\" + matrix[i, firstPosDif0[i]]);
+                    //Console.WriteLine("frac: " + A[di, firstPosDif0[j]]+"\\" + A[j, firstPosDif0[j]]);
                     //Console.WriteLine("mul: " + mulCoef);
                     int updateFirstPosDiff = firstPosDif0[di];
                     for (int j = firstPosDif0[di]; j < jMax; j++)
@@ -185,7 +193,7 @@ namespace NumericalAnalysis
                         if (Math.Abs(matrix[di, j]) < eps)
                             matrix[di, j] = 0;
 
-                        // There is a case in which column i and i+1 have the same value, that means after subtracting 2 rows, there are 2 zeros next to each other.
+                        // There is a case in which column j and j+1 have the same value, that means after subtracting 2 rows, there are 2 zeros next to each other.
                         // This if block ensure firstPosDiff is corrected.
 
                         if (Math.Abs(matrix[di, j]) == 0 && Math.Abs(matrix[di, updateFirstPosDiff]) == 0 && j == updateFirstPosDiff)
@@ -200,12 +208,12 @@ namespace NumericalAnalysis
                 PrintArray(firstPosDif0,s:"First position that is different from 0:");
             }
             _firstPosDif0 = firstPosDif0;
-            //PrintMatrix(matrix);
+            //PrintMatrix(A);
             return true;
         }
 
         /// <summary>
-        /// Subtract matrix from back to front.
+        /// Subtract A from back to front.
         /// </summary>
         /// <param name="processedMatrix"></param>
         /// <param name="firstPosDif0"></param>
@@ -229,12 +237,24 @@ namespace NumericalAnalysis
                 }
                 lastPosDif0[i] = jMax - 1;
             }
-            roots = new Dictionary<int, Dictionary<int, double>>();
-            if (firstPosDif0[firstPosDif0.Length - 1] > iMax - 1)
+            // Khi cả hàng cuối ma trận, tất cả hệ số bằng 0 trừ hệ số của ma trận B, ma trận này vô nghiệm
+            if (firstPosDif0[firstPosDif0.Length - 1] == iMax-1)
             {
                 roots = null;
                 return false;
             }
+            // ta cần tìm ra hạng của ma trận, căn cứ vào đó cho ta công thức nghiệm
+            int rankMatrix = 0;
+            for(int i = iMax-1;i>=0;i--)
+            {
+                if (firstPosDif0[i] < iMax)
+                {
+                    rankMatrix = i + 1; 
+                    break;
+                }
+            }
+            iMax = rankMatrix;
+            roots = new Dictionary<int, Dictionary<int, double>>();
             for (int i = iMax - 1; i >= 0; i--)
             {
                 Dictionary<int, double> root = new Dictionary<int, double>();
@@ -251,7 +271,7 @@ namespace NumericalAnalysis
                 {
                     if (roots.ContainsKey(j))
                     {
-                        //foreach (KeyValuePair<int, double> x_j in roots[j]) 
+                        //foreach (KeyValuePair<int, double> x_j in roots[i]) 
                         //{
                         //    Console.WriteLine("x_j.Key : {0} ",x_j.Key);
                         //}
@@ -287,8 +307,10 @@ namespace NumericalAnalysis
         {
             int[] firstPosDif0;
             PrioritizedSubtraction(ref matrix, out firstPosDif0, out int[] changedPos);
-            if(GaussJordanAddingRoots(ref matrix, firstPosDif0, changedPos, out roots));
+            if(GaussJordanAddingRoots(ref matrix, firstPosDif0, changedPos, out roots))
+            {
                 return true;
+            }
             return false;
         }
 
@@ -306,14 +328,14 @@ namespace NumericalAnalysis
 
             ChangeLastColSide(ref matrix);
 
-            bool[] chosenCols = new bool[jMax - 1]; // Minus 1 to not include matrix b in choosing pivot points
+            bool[] chosenCols = new bool[jMax - 1]; // Minus 1 to not include A b in choosing pivot points
             bool[] chosenRows = new bool[iMax];
 
             for (int i = 0; i < iMax; i++)
             {
                 chosenRows[i] = false;
             }
-            for (int j = 0; j < jMax - 1; j++) // Minus 1 to not include matrix b in choosing pivot points
+            for (int j = 0; j < jMax - 1; j++) // Minus 1 to not include A b in choosing pivot points
             {
                 chosenCols[j] = false;
             }
@@ -326,7 +348,7 @@ namespace NumericalAnalysis
                 for (int i = 0; i < iMax; i++)
                 {
                     if (chosenRows[i]) continue;
-                    for (int j = 0; j < jMax - 1; j++) // Minus 1 to not include matrix b in choosing pivot points
+                    for (int j = 0; j < jMax - 1; j++) // Minus 1 to not include A b in choosing pivot points
                     {
                         if (chosenCols[j]) continue;
                         if (Math.Abs(matrix[i, j]) == 1)
@@ -354,7 +376,7 @@ namespace NumericalAnalysis
                     for (int j = 0; j < jMax; j++)
                     {
                         matrix[i, j] = matrix[i, j] - muCoef * matrix[row, j];
-                        if (Math.Abs(matrix[i, j]) < eps) matrix[i, j] = 0; // Rounding matrix at position to ensure no errors.
+                        if (Math.Abs(matrix[i, j]) < eps) matrix[i, j] = 0; // Rounding A at position to ensure no errors.
                     }
                 }
                 PrintMatrix(matrix, true);
@@ -438,7 +460,7 @@ namespace NumericalAnalysis
             LUSolveForY(L, b, out double[] y);
             LUSolveForX(U, y, out double[] x);
             PrintArray(x);
-            return false;
+            return true;
         }
 
 
@@ -456,12 +478,12 @@ namespace NumericalAnalysis
                 // Upper Triangular
                 for (int k = i; k < n; k++)
                 {
-                    // Summation of L(i, j) * U(j, k)
+                    // Summation of L(j, i) * U(i, k)
                     double sum = 0;
                     for (int j = 0; j < i; j++)
                         sum += (L[i, j] * U[j, k]);
 
-                    // Evaluating U(i, k)
+                    // Evaluating U(j, k)
                     U[i, k] = matrix[i, k] - sum;
                 }
 
@@ -472,12 +494,12 @@ namespace NumericalAnalysis
                         L[i, i] = 1; // Diagonal as 1
                     else
                     {
-                        // Summation of L(k, j) * U(j, i)
+                        // Summation of L(k, i) * U(i, j)
                         double sum = 0;
                         for (int j = 0; j < i; j++)
                             sum += (L[k, j] * U[j, i]);
 
-                        // Evaluating L(k, i)
+                        // Evaluating L(k, j)
                         L[k, i]
                             = (matrix[k, i] - sum) / U[i, i];
                     }
@@ -532,43 +554,102 @@ namespace NumericalAnalysis
 
         #region Choleski
 
-        /*public static bool CholeskiDecomposition(double[,] matrix, double eps = 1e-7, out double[,] lower)
+        public static bool CholeskiMain(double[,] matrix)
         {
-            lower = null;
-            int iMax = matrix.GetLength(0);
-            int jMax = matrix.GetLength(1);
             if (!SeperatingAb(matrix, out double[,] A, out double[] b))
                 return false;
+            if (!CholeskiDecomposition(A, b,out double[,] L, out bool Ted))
+                return false ;
+            CholeskiForwardSub(L, b, out double[] y);
+            TransposeMatrix(L, out double[,] Lt);
+            CholeskiBackwardSub(Lt,y,out double[] root);
+            PrintArray(root,true,"root");
+            return true;
+        }
+
+        public static bool CholeskiDecomposition(double[,] A, double[] b, out double[,] lower, out bool Ted)
+        {
+            Ted = false;
+            lower = null;
+            int iMax = A.GetLength(0);
+            int jMax = A.GetLength(1);
             if (!IsSquareMartrixHermitian(A))
             {
-                Console.WriteLine("Matrix is not Hermitian");
-                return false;
+                Console.WriteLine("Matrix is not Hermitian, multiplying with At");
+                TransposeMatrix(A, out double[,] At);
+                double[,] A1 = Mul2Matrix(A, At);
+                A = A1;
             }
             lower = new double[iMax, iMax];
             for (int i = 0; i < iMax; i++)
-                for (int j = i; j < iMax; j++)
+                for (int j = 0; j <= i; j++)
                 {
-                    double Sum = 0;
-                    for (int k = 0; k < j; k++)
+                    double sum = 0;
+                    if (j == i)
                     {
-                        Sum += lower[j, k] * lower[j, k];
+                        for (int k = 0; k < j; k++)
+                            sum += Math.Pow(lower[j, k], 2);
+                        lower[j, j] = Math.Sqrt(A[j, j] - sum);
                     }
-                    if (i == j)
-                        lower[j, i] = Math.Sqrt(matrix[i, i] - Sum);
                     else
-                        lower[j, i] = (matrix[j, i] - Sum) / lower[j, i];
+                    {
+                        // Evaluating L(j, i)
+                        // using L(i, i)
+                        for (int k = 0; k < j; k++)
+                            sum += (lower[i, k] * lower[j, k]);
+                        lower[i, j] = (A[i, j] - sum) / lower[j, j];
+                    }
                 }
-                        
+            PrintMatrix(lower);
+            return true;
+        }
+        
+        // Sau khi phân tách Choleski: LLt * x = b -> L * y = b -> y = L^-1 * b bằng phương pháp thế xuôi
+        // Lt * x = y -> x = Lt^-1 * y bằng phương pháp thế ngược
 
+        //Thế xuôi
 
-        }*/
+        public static void CholeskiForwardSub(double[,] L, double[] b,out double[] y)
+        {
+            int iMax = L.GetLength(0);
+            int jMax = L.GetLength(1);
+
+            y = new double[iMax];
+
+            for (int i = 0; i < iMax; i++)
+            {
+                double yTemp = b[i];
+                for (int j = 0; j < i; j++)
+                {
+                    yTemp -= L[i, j] * y[j];
+                }
+                y[i] = yTemp;
+            }
+        }
+
+        public static void CholeskiBackwardSub(double[,] U, double[]y, out double[] x)
+        {
+            int iMax = U.GetLength(0);
+            int jMax = U.GetLength(1);
+
+            x = new double[iMax];
+            for (int i = iMax - 1; i > 0; i--)
+            {
+                double xTemp = y[i];
+                for (int j = iMax - 1; j > i; j--)
+                {
+                    xTemp -= U[i, j] * x[j];
+                }
+                x[i] = xTemp;
+            }
+        }
 
         public static bool IsSquareMartrixHermitian(double[,] matrix)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
             for (int i = 0; i < iMax; i++)
-                for (int j = i; j < jMax; j++)
+                for (int j = 0; j < i; j++)
                     if (matrix[i, j] != matrix[iMax - i - 1, jMax - j - 1])
                         return false;
             return true;
@@ -582,7 +663,7 @@ namespace NumericalAnalysis
         {
             if (!MatrixRefactorAndNormCheck(matrix, out double q, out int mode))
             { Console.WriteLine("Norm does not satisfy condition."); return false; }
-            //PrintMatrix(matrix);
+            //PrintMatrix(A);
             if (!SimpleIterator(ref matrix, seed, mode, q, out double[] root, eps, out string s))
             {
                 Console.WriteLine(s);
@@ -708,7 +789,7 @@ namespace NumericalAnalysis
             if (mode == 2) goto MODE2;
 
             MODE1:
-            double[,] Alpha1 = AddMarixWithnT(A, 1);
+            double[,] Alpha1 = AddMatrixWithnI(A, 1);
             double[] Beta1 = MulVectorWithN(b, -1);
             //PrintMatrix(Alpha1);
             do
@@ -730,7 +811,7 @@ namespace NumericalAnalysis
 
 
             MODE2:
-            double[,] Alpha2 = AddMarixWithnT(MulMatrixWithN(A, -1), 1);
+            double[,] Alpha2 = AddMatrixWithnI(MulMatrixWithN(A, -1), 1);
             //PrintMatrix(Alpha2);
             do
             {
@@ -758,7 +839,7 @@ namespace NumericalAnalysis
 
         #region JacobiIterative
 
-        //Require B matrix's norm < q < 1 ; x = Bx + b
+        //Require B A's norm < q < 1 ; x = Bx + b
 
         public static void JacobiIterativeMain(ref double[,] matrix, double[] seed, double eps = 1e-7)
         {
@@ -767,7 +848,7 @@ namespace NumericalAnalysis
             Console.WriteLine("n:{0}", n);
             if (n == 0)
             {
-                Console.WriteLine("Norm check failed");
+                Console.WriteLine("Ma trận không chéo trội");
                 return;
             }
 
@@ -874,7 +955,7 @@ namespace NumericalAnalysis
                     sum += Math.Abs(matrix[i, j]);
                 }
                 sum -= Math.Abs(matrix[j, j]);
-                if (sum > Math.Abs(matrix[j, j]))
+                if (sum >= Math.Abs(matrix[j, j]))
                 {
                     goto MODE0;
                 }
@@ -887,12 +968,13 @@ namespace NumericalAnalysis
             return 2;
 
 
-            // Không là ma trận chéo chội // Is not a diagonally dominant matrix
+            // Không là ma trận chéo chội // Is not a diagonally dominant A
             MODE0:
             q = -1;
             return 0;
 
         }
+       
 
         // Ma trận chéo chội hàng
         public static bool JacobiIterativeRow(ref double[,] matrix, double[] seed, out double[] root, double q, double eps, out string s)
@@ -912,7 +994,7 @@ namespace NumericalAnalysis
 
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
 
-            double[,] Alpha = AddMarixWithnT(MulMatrixWithN(A, -1), 1); // alpha = I-A
+            double[,] Alpha = AddMatrixWithnI(MulMatrixWithN(A, -1), 1); // alpha = I-A
 
             do
             {
@@ -957,7 +1039,7 @@ namespace NumericalAnalysis
 
             int itr = 0, itrMax = Convert.ToInt32(Math.Sqrt(1 / eps));
 
-            double[,] Alpha = AddMarixWithnT(MulMatrixWithN(A, -1), 1); // alpha = I-A
+            double[,] Alpha = AddMatrixWithnI(MulMatrixWithN(A, -1), 1); // alpha = I-A
             do
             {
                 SetSameValue(root, root2);
@@ -1001,13 +1083,8 @@ namespace NumericalAnalysis
 
         #region Gauss-Seidel
 
-        public static void GaussSeidelIterativeMain(ref double[,] matrix, double eps = 1e-7)
+        public static void GaussSeidelIterativeMain(ref double[,] matrix, double[] seed, double eps = 1e-7)
         {
-            double[] seed = new double[matrix.GetLength(0)];
-            for (int n = 0; n < seed.Length; n++)
-            {
-                seed[n] = 0;
-            }
             string s;
             if (!GaussSeidelIterativeMethod(ref matrix, seed, out double[] root, eps, out s))
             {
@@ -1061,9 +1138,9 @@ namespace NumericalAnalysis
                         temp -= matrix[i, j] * root2[j];
                     }
                     root2[i] = temp / matrix[i, i];
-                    //Console.WriteLine("temp2: " + root2[i]);
-                    //Console.WriteLine("temp: " + root[i]);
-                    //Console.WriteLine("Diff: " + Math.Abs(root2[i] - root[i]));
+                    //Console.WriteLine("temp2: " + root2[j]);
+                    //Console.WriteLine("temp: " + root[j]);
+                    //Console.WriteLine("Diff: " + Math.Abs(root2[j] - root[j]));
                 }
                 itr++;
                 PrintArray(root2, true);

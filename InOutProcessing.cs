@@ -78,6 +78,8 @@ namespace NumericalAnalysis
                 }
                 else
                 {
+                    if (l == seed.Length) 
+                        break;
                     seed[l] = temp;
                     l++;
                 }

@@ -26,7 +26,7 @@ namespace NumericalAnalysis
                 firstPosDif0 = new int[iMax]; // First position that is different from 0
                 for (int i = 0; i < iMax; i++)
                 {
-                    firstPosDif0[i] = 0;
+                    firstPosDif0[i] = jMax;
                     for (int j = 0; j < jMax; j++)
                     {
                         if (!matrix[i, j].Equals(0d))
@@ -238,7 +238,7 @@ namespace NumericalAnalysis
             return true;
         }
 
-        public static bool AddMarixWithnT(ref double[,] matrix, int n)
+        public static bool AddMatrixWithnI(ref double[,] matrix, int n)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -254,7 +254,7 @@ namespace NumericalAnalysis
             return true;
         }
 
-        public static double[,] AddMarixWithnT(double[,] matrix, int n)
+        public static double[,] AddMatrixWithnI(double[,] matrix, int n)
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
@@ -270,6 +270,57 @@ namespace NumericalAnalysis
             for (int i = 0; i < iMax; i++)
             {
                 result[i, i] += n;
+            }
+            return result;
+        }
+
+        public static double[,] SubtractMatrixWithnI(double[,] matrix, int n)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            double[,] result = new double[iMax, jMax];
+            for (int i = 0; i < iMax; i++)
+            {
+                for (int j = 0; j < jMax; j++)
+                {
+                    result[i, j] = matrix[i, j];
+                }
+            }
+            for(int i = 0; i < iMax; i++)
+                result[i, i] -= n;
+            return result;
+        }
+
+        public static double[,] SubtractIwithMatrix(int n, double[,] matrix)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            double[,] result = new double[iMax, jMax];
+            for (int i = 0; i < iMax; i++)
+            {
+                for (int j = 0; j < jMax; j++)
+                {
+                    result[i, j] = -matrix[i, j];
+                }
+            }
+            for (int i = 0; i < iMax; i++)
+                result[i, i] += n;
+            return result;
+        }
+
+        public static double[,] Subtract2Matrix(double[,] A, double[,] B)
+        {
+            int iMax = A.GetLength(0);
+            int jMax = B.GetLength(1);
+
+            double[,] result = new double[iMax, jMax];
+
+            for (int i = 0; i < iMax; i++)
+            {
+                for (int j = 0; j < jMax; j++)
+                {
+                    result[i, j] = A[i, j] - B[i, j];
+                }
             }
             return result;
         }
@@ -305,6 +356,24 @@ namespace NumericalAnalysis
             {
                 for (int j = 0; j < jMax; j++)
                     result[i,j] += matrix[i, j] * n;
+            }
+            return result;
+        }
+
+        public static double[,] MulMatrixWithN(double[,] matrix, double n)
+        {
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+            double[,] result = new double[iMax, jMax];
+            if (iMax != jMax)
+            {
+                Console.WriteLine("Not square matrix");
+                return null;
+            }
+            for (int i = 0; i < iMax; i++)
+            {
+                for (int j = 0; j < jMax; j++)
+                    result[i, j] += matrix[i, j] * n;
             }
             return result;
         }
@@ -354,17 +423,54 @@ namespace NumericalAnalysis
         public static bool TransposeMatrix(double[,] matrix, out double[,] transposedMatrix)
         {
             transposedMatrix = null;
+
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
 
             if (iMax != jMax)
                 return false;
 
+            transposedMatrix = new double[iMax,jMax];
+
             for (int i = 0; i < iMax; i++)
                 for (int j = 0; j < jMax; j++)
                     transposedMatrix[j, i] = matrix[i, j];
             return true;
         }
+
+        public static double[,] Add2Matrix(double[,] A, double[,] B)
+        {
+            double[,] result = new double[A.GetLength(0), A.GetLength(0)];
+            for (int i = 0; i < A.GetLength(0); i++)
+            {
+                for(int j = 0;j<A.GetLength(1);j++)
+                {
+                    result[i,j] = A[i,j] + B[i,j];
+                }    
+            }
+            return result;
+        }
+
+        // Triangular matrix
+
+        public static bool TransposeTriangularMatrix(double[,] matrix, out double[,] transposedMatrix)
+        {
+            transposedMatrix = null;
+
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            if (iMax != jMax)
+                return false;
+
+            transposedMatrix = new double[iMax, jMax];
+
+            for (int i = 0; i < iMax; i++)
+                for (int j = 0; j <=i; j++)
+                    transposedMatrix[j, i] = matrix[i, j];
+            return true;
+        }
+
         #endregion
     }
 }
