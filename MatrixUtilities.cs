@@ -116,13 +116,13 @@ namespace NumericalAnalysis
                 {
                     if (flippedLastCol && j == jMax - 1)
                     {
-                        Console.Write((-matrix[i, j]) + " ");
+                        Console.Write("{0}\t",(-matrix[i, j]).ToString());
                     }
-                    else Console.Write(matrix[i, j] + " ");
+                    else Console.Write("{0}\t", matrix[i,j].ToString());
                 }
                 Console.WriteLine();
             }
-            Console.WriteLine();
+            Console.WriteLine("=====================================================");
         }
 
         public static void PrintArray<T>(T[] array, bool printVertically = false, string s = "array")
@@ -177,6 +177,7 @@ namespace NumericalAnalysis
             int rNumCol = rightMatrix.GetLength(1);
             if (lNumCol != rNumRow)
             {
+                Console.WriteLine("A FAILED MULTIPLICATION OF MATRICES WAS DETECTED");
                 return null;
             }
             double [,] result = new double[lNumRow, rNumCol];
@@ -225,7 +226,6 @@ namespace NumericalAnalysis
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            if (iMax != jMax - 1) { A = null; b = null; Console.WriteLine("Not square matrix"); return false; }
             A = new double[iMax, iMax]; b = new double[iMax];
             for (int i = 0; i < iMax; i++)
             {
@@ -244,7 +244,7 @@ namespace NumericalAnalysis
             int jMax = matrix.GetLength(1);
             if (iMax != jMax)
             {
-                Console.WriteLine("Not square matrix");
+                Console.WriteLine("Cộng ma trận với n*I không thành công do không phải ma trận vuông");
                 return false;
             }
             for (int i = 0; i < iMax; i++)
@@ -264,7 +264,7 @@ namespace NumericalAnalysis
                     result[i, j] = matrix[i, j];
             if (iMax != jMax)
             {
-                Console.WriteLine("Not square matrix");
+                Console.WriteLine("Cộng ma trận với n*I không thành công do ma trận không vuông");
                 return null;
             }
             for (int i = 0; i < iMax; i++)
@@ -329,11 +329,7 @@ namespace NumericalAnalysis
         {
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
-            if (iMax != jMax)
-            {
-                Console.WriteLine("Not square matrix");
-                return false;
-            }
+            
             for (int i = 0; i < iMax; i++)
             {
                 for (int j = 0; j < jMax; j++)
@@ -347,11 +343,7 @@ namespace NumericalAnalysis
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
             double[,] result = new double[iMax, jMax];
-            if (iMax != jMax)
-            {
-                Console.WriteLine("Not square matrix");
-                return null;
-            }
+            
             for (int i = 0; i < iMax; i++)
             {
                 for (int j = 0; j < jMax; j++)
@@ -365,11 +357,7 @@ namespace NumericalAnalysis
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
             double[,] result = new double[iMax, jMax];
-            if (iMax != jMax)
-            {
-                Console.WriteLine("Not square matrix");
-                return null;
-            }
+            
             for (int i = 0; i < iMax; i++)
             {
                 for (int j = 0; j < jMax; j++)
@@ -400,24 +388,24 @@ namespace NumericalAnalysis
             return result;
         }
 
-        public static void SetSameValue(double[]x,double[]y)
+        public static void SetSameValue(double[]target,double[]source)
         {
-            int xLen = x.Length;
-            int ylen = x.Length;
+            int xLen = target.Length;
+            int ylen = target.Length;
             if (xLen != ylen) return ;
             for (int i = 0; i < xLen; i++)
-                x[i] =y[i];
+                target[i] =source[i];
         }
-        public static void SetSameValue(double[,] x, double[,] y)
+        public static void SetSameValue(double[,] target, double[,] source)
         {
-            int iMax = x.GetLength(0);
-            int jMax = y.GetLength(1);
-            int iymax = x.GetLength(0);
-            int jymax = y.GetLength(1);
-            if (iMax != iymax) return;
-            for (int i = 0; i < iMax; i++)
-                for (int j = 0; j < jMax; j++)
-                    x[i, j] = y[i, j];
+            int iTarget = target.GetLength(0);
+            int jTarget = source.GetLength(1);
+            int iSource = target.GetLength(0);
+            int jSource = source.GetLength(1);
+            if (iTarget != iSource) return;
+            for (int i = 0; i < iTarget; i++)
+                for (int j = 0; j < jTarget; j++)
+                    target[i, j] = source[i, j];
         }
 
         public static bool TransposeMatrix(double[,] matrix, out double[,] transposedMatrix)
@@ -469,6 +457,26 @@ namespace NumericalAnalysis
                 for (int j = 0; j <=i; j++)
                     transposedMatrix[j, i] = matrix[i, j];
             return true;
+        }
+
+        /*public static bool LinearCheckResult(double[,] matrix, double[] root)
+        {
+            SeperatingAb(matrix, out double[,] A, out double[] b);
+            int a = b.Length;
+            double[] AX = MulMatrixWithVector(A, root);
+            for(int i = 0;i<a;i++)
+            {
+                if (AX[i] != b[i])
+                    return false;
+            }
+            return true;
+        }*/
+
+        public static void InverseCheckResult(double[,] matrix, double[,] inversed, out double[,] check)
+        {
+            int n = matrix.GetLength(0);
+            check = Mul2Matrix(matrix, inversed);
+            return ;
         }
 
         #endregion
