@@ -6,11 +6,24 @@ using System.Threading.Tasks;
 
 namespace NumericalAnalysis
 {
-    internal class Algorithms_EigenValues
+    public partial class Algorithms
     {
-        public void DanilevskiMain(double[,] matrix)
+        public static void Chapter5Main()
         {
+            string fileLocation = @"MatrixEigenInput.txt";
+            if (!InOutProcessing.MatrixInput(out double[,] matrix, out double[] _, fileLocation))
+            {
+                Console.WriteLine("Invalid Inputs");
+            }
+            Algorithms.PrintMatrix(matrix);
+            
+            DanilevskiMain(matrix);
+            
+        }
 
+        public static void DanilevskiMain(double[,] matrix)
+        {
+            Danilevski(matrix);
         }
 
         /*public bool DanilevskiConvertToFrobenius(double[,] matrix, out double[,] frobenius)

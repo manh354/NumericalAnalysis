@@ -177,7 +177,7 @@ namespace NumericalAnalysis
             int rNumCol = rightMatrix.GetLength(1);
             if (lNumCol != rNumRow)
             {
-                Console.WriteLine("A FAILED MULTIPLICATION OF MATRICES WAS DETECTED");
+                Console.WriteLine("A FAILED MULTIPLICATION OF MATRICES WAS DETECTED (lNumCol = {0}, rNumRow = {1})",lNumCol,rNumRow);
                 return null;
             }
             double [,] result = new double[lNumRow, rNumCol];
@@ -377,6 +377,17 @@ namespace NumericalAnalysis
             return result;
         }
 
+        public static double[] MulVectorWithN(double[] x, double n)
+        {
+            int len = x.Length;
+            double[] result = new double[len];
+            for (int i = 0; i < len; i++)
+            {
+                result[i] = x[i] * n;
+            }
+            return result;
+        }
+
         public static double[] Add2Vector(double[]x, double[] y)
         {
             int xLen = x.Length;
@@ -385,6 +396,21 @@ namespace NumericalAnalysis
             double[] result = new double[xLen];
             for (int i = 0; i < xLen; i++)
                 result[i] = x[i] + y[i];
+            return result;
+        }
+
+        public static double[] Subtract2Vector(double[] l, double[] r)
+        {
+            int xLen = l.Length;
+            int ylen = l.Length;
+            if (xLen != ylen)
+            {
+                Console.WriteLine("SUBTRACT TWO MATRICES FAILED");
+                return null; 
+            }
+            double[] result = new double[xLen];
+            for (int i = 0; i < xLen; i++)
+                result[i] = l[i] - r[i];
             return result;
         }
 
@@ -415,16 +441,27 @@ namespace NumericalAnalysis
             int iMax = matrix.GetLength(0);
             int jMax = matrix.GetLength(1);
 
-            if (iMax != jMax)
-                return false;
-
-            transposedMatrix = new double[iMax,jMax];
+            transposedMatrix = new double[jMax,iMax];
 
             for (int i = 0; i < iMax; i++)
                 for (int j = 0; j < jMax; j++)
                     transposedMatrix[j, i] = matrix[i, j];
             return true;
         }
+
+        public static double[,] TransposeMatrix(double[,] matrix)
+        { 
+            int iMax = matrix.GetLength(0);
+            int jMax = matrix.GetLength(1);
+
+            var transposedMatrix = new double[jMax, iMax];
+
+            for (int i = 0; i < iMax; i++)
+                for (int j = 0; j < jMax; j++)
+                    transposedMatrix[j, i] = matrix[i, j];
+            return transposedMatrix;
+        }
+
 
         public static double[,] Add2Matrix(double[,] A, double[,] B)
         {
@@ -479,6 +516,148 @@ namespace NumericalAnalysis
             return ;
         }
 
+        public static double[,] CopyFromMatrix(double[,] source,int startRow, int endRow, int startCol,int endCol)
+        {
+            double[,] result = new double[endRow - startRow + 1, endCol - startCol + 1];
+            int di = 0;int dj;
+            for (int i = startRow; i <= endRow; i++)
+            {
+                dj = 0;
+                for (int j = startCol; j <= endCol; j++)
+                {
+                    result[di, dj] = source[i, j];
+                    dj++;
+                }
+                di++;
+            }
+            return result;
+        }
+
+        public static void CopyFromMatrix(double[,] source,ref double[,] target ,int sstartRow, int sendRow, int sstartCol, int sendCol,int tstartRow, int tendRow,int tstartCol,int tendCol)
+        {
+            if(sstartRow-sendRow != tstartRow-tendRow && sstartCol-sendCol != tstartCol-tendCol)
+            {
+                Console.WriteLine("Lỗi, không thể set value khập khiễng!");
+                return;
+            }    
+            for(int i = sstartRow; i < sstartRow; i++)
+            {
+                for (int j = sstartCol; j < sendCol; j++)
+                {
+                    target[tstartRow, tstartCol] = source[i, j];
+                    tstartCol++;
+                }
+                tstartRow++;
+            }    
+        }
+
+        public static double[,] VStack(params double[][,]? matrixs)
+        {
+            int n = matrixs[0].GetLength(1);
+            int iMax = 0;
+            int jMax = n;
+            foreach (double[,] matrix in matrixs)
+            {
+                iMax += matrix.GetLength(0);
+                if (jMax < matrix.GetLength(1))
+                    jMax = matrix.GetLength(1);
+            }
+            double[,] result = new double[iMax, jMax];
+            int i = 0;
+            foreach (double[,] matrix in matrixs)
+            {
+                for (int di = 0; di < matrix.GetLength(0); di++)
+                {
+                    int j = 0;
+                    for (int dj = 0; dj < matrix.GetLength(1); dj++)
+                    {
+                        result[i, j] = matrix[di, dj];
+                        j++;
+                    }
+                    i++;
+                }
+            }
+            return result;
+        }
+
+        public static double[,] EyeMatrix(int n)
+        {
+            double[,] eye = new double[n, n];
+            for (int i = 0; i < n; i++)
+            {
+                eye[i, i] = 1; 
+            }
+            return eye;
+        }
+
+        public static double[,] OneArray(int n)
+        {
+            double[,] result = new double[1, n];
+            for (int i = 0; i < n; i++)
+            {
+                result[0, i] = 1;
+            }
+            return result;
+        }
+
+        public static double[,] Zeros(int m,int n)
+        {
+            double[,] result = new double[m, n];
+            return result;
+        }
+
+        public static double[] Zeros(int m)
+        {
+            double[] result = new double[m];
+            return result;
+        }
+
+        public static double[,] Convert1To2(double[] x)
+        {
+            double[,] xx  = new double[1, x.Length];
+            for (int i = 0; i < x.Length; i++)
+            {
+                xx[0, i] = x[i];
+            }
+            return xx;
+        }
+
+        public static double[,] ExpandVer(double[,] TargetMatrix, double[,] vector)
+        {
+            double[,] result;
+            if (TargetMatrix == null)
+            {
+                result = new double[vector.GetLength(0),vector.GetLength(1)];
+                SetSameValue(result, vector);
+                return result; 
+            }
+            result = new double[TargetMatrix.GetLength(0), TargetMatrix.GetLength(1) + 1];
+            for(int i =0; i < TargetMatrix.GetLength(0); i++)
+            {
+                for(int j = 0;j<TargetMatrix.GetLength(1);j++)
+                {
+                    result[i, j] = TargetMatrix[i, j];
+                }    
+            }    
+            for(int k = 0; k<TargetMatrix.GetLength(0);k++)
+            {
+                result[k,TargetMatrix.GetLength(0)] = vector[k,0];
+            }
+            return result;
+        }
+
+        public static double[,] ExpandZero(double[,] TargetMatrix, int row,int col)
+        {
+            double[,] result = new double[row, col];
+            for(int i =0; i< TargetMatrix.GetLength(0);i++)
+            {
+                for(int j = 0;j <TargetMatrix.GetLength(1);j++)
+                {
+                    result[i, j] = TargetMatrix[i, j]; 
+                }    
+            }
+            return result;
+        }
         #endregion
     }
 }

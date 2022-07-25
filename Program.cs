@@ -15,7 +15,7 @@ namespace NumericalAnalysis
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("vi-VN");
             while (true)
             {
-                Console.WriteLine("Nhập 2 để chọn chương 2, nhập 3 để chọn chương 3, nhập 4 để chọn chương 4");
+                Console.WriteLine("Nhập 2 để chọn phương trình f(x) = a, nhập 3 để chọn Ax = b, nhập 4 để chọn A^-1 , nhập 5 để chọn giá trị riêng/vt riêng , nhập 6 để chọn A = USVt ");
                 switch (Console.ReadLine())
                 {
                     case "2":
@@ -26,6 +26,12 @@ namespace NumericalAnalysis
                         break;
                     case "4":
                         Algorithms.Chapter4Main();
+                        break;
+                    case "5":
+                        Algorithms.Chapter5Main();
+                        break;
+                    case "6":
+                        Algorithms.Chapter6Main();
                         break;
                     case "break":
                         goto BREAK;

@@ -68,6 +68,10 @@ namespace NumericalAnalysis
                 i++;
             }
             int l = 0;
+            if (sseed == null)
+            {
+                seed = null; return true;
+            }
             foreach (string elem in sseed)
             {
                 //Console.WriteLine("elem: {0}", elem);

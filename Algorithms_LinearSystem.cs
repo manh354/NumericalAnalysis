@@ -149,8 +149,9 @@ namespace NumericalAnalysis
         {
             int[] firstPosDif0;
             ForwardElimination(ref matrix, out firstPosDif0);
-            BackwardSubstitution(ref matrix, firstPosDif0, out roots);
-            return true;
+            if (BackwardSubstitution(ref matrix, firstPosDif0, out roots))
+                return true;
+            else return false;
         }
 
         /// <summary>
