@@ -44,7 +44,7 @@ namespace NumericalAnalysis
 
             /* FindRankA: đi tìm rank của ma trận A, trả về hạng của ma trận A  */
 
-            /* NullityA : Đi tìm trị số nullity của A, = n - rankA, trả về số lượng tối đa các vecto u
+            /* NullityA : Đi tìm trị số nullity của A, = n - rankA, trả về số lượng tối đa các vecto onto
              * Độc lập tuyến tính trong không gian Rn mà Av = 0 */
 
             /* Ta chứng minh được : AtA và AAt là 2 ma trận đối xứng, rank A = rank (AtA), giá trị riêng 
@@ -72,10 +72,10 @@ namespace NumericalAnalysis
             (var eigenValuesV, var _eigenVectorsV) = Danilevski(Mul2Matrix(At, A));
 
             var eigenVectorsV = new List<double[]>();
-            for(int i = 0; i < _eigenVectorsV.Count-1 ; i++)
+            for(int i = 0; i < _eigenVectorsV.Count ; i++)
             {
                 var eVectorV = new double[_eigenVectorsV[0].GetLength(0)];
-                for(int j = 0; j < eVectorV.Length-1; j++)
+                for(int j = 0; j < eVectorV.Length; j++)
                 {
                     eVectorV[j] = _eigenVectorsV[i][j,0];
                 }    
@@ -90,17 +90,25 @@ namespace NumericalAnalysis
             S = new double[eigenValuesV.Count, eigenValuesV.Count];
             for(int i = 0;i< eigenValuesV.Count;i++)
             {
-                S[i,i] = Math.Sqrt(eigenValuesV[i]);
+                S[i, i] = Math.Sqrt(eigenValuesV[eigenValuesV.Count - 1 - i]);
             }
 
             List<double[]> normVectorsV;
 
             normVectorsV = GramSchmidt(eigenVectorsV);
 
-            foreach (double[]v in normVectorsV)
+            foreach(var v in normVectorsV)
             {
-                PrintArray(v);
-            }    ;
+                Vt = ExpandVer(Vt, TransposeMatrix(Convert1To2(v)));
+            }
+            Vt = TransposeMatrix(Vt);
+
+            Console.WriteLine("Is orthonorm yet? : "+CheckOrthonormalized(normVectorsV));
+
+            for(int i = 0;i<normVectorsV.Count;i++)
+            {
+                PrintArray(normVectorsV[i]);
+            }    
 
             int rankA = RankMatrix(A);
             Console.WriteLine("Hạng A :{0}",rankA);
@@ -109,10 +117,11 @@ namespace NumericalAnalysis
             PrintMatrix(S);
 
             int it = 0;
-            while (it < rankA-1)
+            while (it < rankA)
             {
-                double[,] ui = MulMatrixWithN( Mul2Matrix(A, TransposeMatrix(Convert1To2(normVectorsV[it]))), 1 / S[it, it]);
-                ExpandVer(U, ui);
+                double[,] ui = MulMatrixWithN( Mul2Matrix(A, TransposeMatrix(Convert1To2(/*chuyển đổi để nhân*/normVectorsV[it]))), 1 / S[it, it]); // Phép 1/Sii * A * Vit
+                U = ExpandVer(U, ui);
+                PrintMatrix(U);
                 it++;
             }
             if(m<n)
@@ -135,10 +144,11 @@ namespace NumericalAnalysis
             for(int i = 0;i<n;i++)
             {
                 u.Add(v[i]);
-                for(int j= 0;j<e.Count;j++)
+                for(int j= 0;j<i;j++)
                 {
                     u[i] = Subtract2Vector(u[i], Projection(u[j], v[i]));
                 }
+                /* PrintArray(u[i],s: string.Format("u{0}",i)); */
                 e.Add(NormalizeVector(u[i]));
             }
             return e;
@@ -158,6 +168,7 @@ namespace NumericalAnalysis
         {
             int n = u.Length;
             double coef = Math.Sqrt(InnerProduct(u, u));
+            Console.WriteLine("Coef: "+coef);
             double[] result = new double[n];
             for(int i = 0;i< n;i++)
             {
@@ -166,9 +177,9 @@ namespace NumericalAnalysis
             return result;
         }
 
-        public static double[] Projection(double[] u, double[]v)
+        public static double[] Projection(double[] onto, double[]original)
         {
-            double[] result = MulVectorWithN(u, InnerProduct(u, v) / InnerProduct(u, u));
+            double[] result = MulVectorWithN(onto, InnerProduct(onto, original) / InnerProduct(onto, onto));
             return result;
         }
 
@@ -251,7 +262,19 @@ namespace NumericalAnalysis
             return Math.Min(rank1Matrix,rank2Matrix);
         }
 
-
+        public static bool CheckOrthonormalized(List<double[]> vectors,double eps = 1e-5)
+        {
+            int n = vectors.Count;
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i+1; j < n; j++)
+                {
+                    if (Math.Abs(InnerProduct(vectors[i], vectors[j])) >= eps)
+                        return false;
+                }
+            }
+            return true;
+        }
 
     }
 }

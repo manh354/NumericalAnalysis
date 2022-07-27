@@ -641,7 +641,7 @@ namespace NumericalAnalysis
             }    
             for(int k = 0; k<TargetMatrix.GetLength(0);k++)
             {
-                result[k,TargetMatrix.GetLength(0)] = vector[k,0];
+                result[k,TargetMatrix.GetLength(1)] = vector[k,0];
             }
             return result;
         }
